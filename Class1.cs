@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using HarmonyLib;
 using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.4.0", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.4.1", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -582,42 +582,49 @@ namespace TechRankExpanderMod
             _kpSpeedEntry = _cat.CreateEntry(
                 "KP_Speed_Multiplier", 5f,
                 display_name: "KP Speed Multiplier",
-                description: "How many times faster knowledge points are generated (e.g. 5 = 5x faster).");
+                description: "How many times faster knowledge points are generated (e.g. 5 = 5x faster). "
+                           + "/ Во сколько раз быстрее генерируются очки знаний (например, 5 = в 5 раз быстрее).");
 
             _carryCapEntry = _cat.CreateEntry(
                 "Carry_Capacity_Multiplier", 3f,
                 display_name: "Villager Carry Capacity Multiplier",
-                description: "Multiplier on how much weight each villager can carry per trip (e.g. 3 = 3x more items).");
+                description: "Multiplier on how much weight each villager can carry per trip (e.g. 3 = 3x more items). "
+                           + "/ Множитель переносимого веса для каждого жителя за поездку (например, 3 = в 3 раза больше предметов).");
 
             _workSpeedEntry = _cat.CreateEntry(
                 "Work_Speed_Per_Rank", 0.01f,
                 display_name: "Work Speed Bonus Per Rank (Production Management)",
-                description: "Bonus to all workers' speed per rank of Production Management purchased (0.01 = +1% per rank).");
+                description: "Bonus to all workers' speed per rank of Production Management purchased (0.01 = +1% per rank). "
+                           + "/ Бонус к скорости всех рабочих за каждый ранг 'Управления производством' (0.01 = +1% за ранг).");
 
             _resetEntry = _cat.CreateEntry(
                 "Reset_Tech_Tree", false,
                 display_name: "Reset Tech Tree",
                 description: "Set to true to refund ALL spent KP and reset ALL tech ranks on the next map load. "
                            + "The flag is automatically cleared after applying. "
-                           + "Use this when mod rank caps have changed and you want to redistribute points.");
+                           + "/ Установите true для возврата всех потраченных ОЗ и сброса всех рангов технологий при следующей загрузке карты. Флаг очищается автоматически.");
 
             _kpHotkeyEntry = _cat.CreateEntry(
                 "KP_Hotkey", "F8",
                 display_name: "KP Hotkey",
                 description: "Press this key in-game to instantly add KP_Hotkey_Amount knowledge points. "
-                           + "Valid values: F1-F12, K, Insert, etc. (UnityEngine.KeyCode names).");
+                           + "Valid values: F1-F12, K, Insert, etc. (UnityEngine.KeyCode names). "
+                           + "/ Нажмите эту клавишу в игре для мгновенного добавления очков знаний. "
+                           + "Допустимые значения: F1-F12, K, Insert и т.д. (имена UnityEngine.KeyCode).");
 
             _kpHotkeyAmountEntry = _cat.CreateEntry(
                 "KP_Hotkey_Amount", 1,
                 display_name: "KP Hotkey Amount",
-                description: "How many knowledge points to add per key press.");
+                description: "How many knowledge points to add per key press. "
+                           + "/ Сколько очков знаний добавлять за одно нажатие клавиши.");
 
             _maxWaxEntry = _cat.CreateEntry(
                 "Max_Wax_Per_Barrel", 2,
                 display_name: "Max Wax Per Barrel (Wax-Sealed Barrels)",
-                description: "Maximum wax (ItemWax) consumed per barrel production. " +
-                             "1 = always 1 wax, 2 = capped at vanilla rank-1 value (default), " +
-                             "0 = removes wax from the recipe entirely.");
+                description: "Maximum wax (ItemWax) consumed per barrel production. "
+                           + "1 = always 1 wax, 2 = capped at vanilla rank-1 value (default), 0 = removes wax from recipe entirely. "
+                           + "/ Максимум воска (ItemWax) на производство одной бочки. "
+                           + "1 = всегда 1 воск, 2 = не выше первого ранга ванили (по умолчанию), 0 = убрать воск из рецепта.");
 
             foreach (var kv in TechDefaults.DefaultRanks)
             {
@@ -629,7 +636,7 @@ namespace TechRankExpanderMod
 
                 var entry = _cat.CreateEntry(key, kv.Value,
                     display_name: kv.Key,
-                    description: $"Max ranks for \"{kv.Key}\" (original game value: 1-3).");
+                    description: $"Max ranks for \"{kv.Key}\" (original game value: 1-3). / Макс. рангов для \"{kv.Key}\" (значение в ванили: 1-3).");
                 _rankEntries[kv.Key] = entry;
             }
 
