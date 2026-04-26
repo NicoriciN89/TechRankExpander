@@ -2,6 +2,18 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.4.0] — 2026-04-26
+
+### Added
+- **BarrelWaxFix merged** — wax cost for Wax-Sealed Barrels is now capped at a configurable value (`Max_Wax_Per_Barrel`, default: 2). Previously the cap was hardcoded to 1 and used a different patch method (`Activate`). The new approach patches `UpdateItemDef` (same as the standalone BarrelWaxFix mod) and supports any cap value, including 0 to remove wax from the recipe entirely.
+- The Wax-Sealed Barrels tech tooltip now shows the active wax cap in the player's UI language.
+
+### Changed
+- Replaced internal `Patch_GE_ManufacturingSourceItemModify_Activate` with `Patch_GE_ManufacturingSourceItemModify_UpdateItemDef` for wax cap logic — more flexible and consistent with BarrelWaxFix behavior.
+- BarrelWaxFix is no longer needed as a separate mod.
+
+---
+
 ## [1.3.0] — 2026-04-26
 
 ### Added
