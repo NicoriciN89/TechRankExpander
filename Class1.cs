@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.3.0", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.4.0", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -96,6 +96,7 @@ namespace TechRankExpanderMod
         internal static bool ResetTechTree = false;
         internal static KeyCode KpHotkey = KeyCode.F8;
         internal static int KpHotkeyAmount = 1;
+        internal static int MaxWaxPerBarrel = 2;
     }
 
     // ── Patch: Villager.GetCarryCapacity ──────────────────────────────────────
@@ -110,27 +111,87 @@ namespace TechRankExpanderMod
     }
     // ──────────────────────────────────────────────────────────────────────────
 
-    // ── Patch: GE_ManufacturingSourceItemModify.Activate ─────────────────────
-    // "Wax Sealed Barrels" calls Activate(1) for every rank, incrementing the
-    // wax-per-barrel requirement by 1 each time (rank 1 → 1 wax, rank 20 → 20).
-    // This prefix skips the call when ItemWax is already present in the recipe,
-    // keeping the requirement permanently at 1 regardless of rank count.
-    [HarmonyPatch(typeof(GE_ManufacturingSourceItemModify), "Activate")]
-    internal static class Patch_GE_ManufacturingSourceItemModify_Activate
+    // ── Patch: GE_ManufacturingSourceItemModify.UpdateItemDef ─────────────────
+    // Each rank of "Wax-Sealed Barrels" calls UpdateItemDef with modify > 0,
+    // incrementing wax cost by 1 per rank (rank 1 → 1 wax, rank 20 → 20 wax).
+    // This prefix caps the addition so wax never exceeds MaxWaxPerBarrel.
+    // Example: MaxWaxPerBarrel=2, currentWax=2 → canAdd=0 → modify=0 → no change.
+    // Deactivation (modify < 0) is never intercepted — the game correctly removes
+    // excess wax when ranks are refunded.
+    [HarmonyPatch(typeof(GE_ManufacturingSourceItemModify), "UpdateItemDef")]
+    internal static class Patch_GE_ManufacturingSourceItemModify_UpdateItemDef
     {
-        static bool Prefix(GE_ManufacturingSourceItemModify __instance, float value)
+        static void Prefix(GE_ManufacturingSourceItemModify __instance, ref float modify)
         {
-            if (value <= 0f) return true; // allow Deactivate path
+            if (modify <= 0f) return;
             string itemName = Traverse.Create(__instance).Field("itemName").GetValue<string>();
-            if (itemName != "ItemWax") return true; // only intercept wax
+            if (itemName != "ItemWax") return;
             ManufactureDefinition manuDef = Traverse.Create(__instance).Field("manuDef").GetValue<ManufactureDefinition>();
-            if (manuDef == null) return true;
-            foreach (SourceItemDefinition src in manuDef.sourceItems)
+            if (manuDef == null) return;
+            int currentTotal = 0;
+            foreach (SourceItemDefinition sourceItem in manuDef.sourceItems)
             {
-                if (src.itemName == itemName)
-                    return false; // already in recipe at 1 — skip
+                if (sourceItem.itemName == "ItemWax")
+                {
+                    currentTotal = sourceItem.numSourceItemsNeeded;
+                    break;
+                }
             }
-            return true; // first activation: allow rank 1 to add wax (1)
+            int canAdd = Mathf.Max(0, RuntimeConfig.MaxWaxPerBarrel - currentTotal);
+            modify = Mathf.Min(modify, (float)canAdd);
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // ── Patch: Wax-Sealed Barrels tooltip ─────────────────────────────────────
+    // Appends the configured wax cap to the tech description in the player's
+    // current UI language so the limit is visible in the tech tree.
+    [HarmonyPatch(typeof(TechTreeManager), "GetTechTreeNodeDescription")]
+    internal static class Patch_GetTechTreeNodeDescription_WaxCap
+    {
+        private static int _waxTechId = -1;
+
+        private static readonly Dictionary<string, string> _waxLoc = new Dictionary<string, string>
+        {
+            ["English"]               = "Wax cost capped at {0}.",
+            ["German"]                = "Wachskosten auf {0} begrenzt.",
+            ["French"]                = "Coût en cire limité à {0}.",
+            ["Italian"]               = "Costo in cera limitato a {0}.",
+            ["Spanish"]               = "Coste de cera limitado a {0}.",
+            ["Portuguese"]            = "Custo de cera limitado a {0}.",
+            ["Russian"]               = "Расход воска ограничен до {0}.",
+            ["Ukrainian"]             = "Витрата воску обмежена до {0}.",
+            ["Polish"]                = "Koszt wosku ograniczony do {0}.",
+            ["Czech"]                 = "Náklady na vosk omezeny na {0}.",
+            ["Swedish"]               = "Vaxkostnaden begränsad till {0}.",
+            ["Japanese"]              = "蠟のコストは {0} に制限されます。",
+            ["Korean"]                = "왁스 비용이 {0}으로 제한됩니다.",
+            ["Chinese (Simplified)"]  = "蜡的消耗限制为 {0}。",
+            ["Chinese (Traditional)"] = "蠟的消耗限制為 {0}。",
+        };
+
+        static void Postfix(TechTreeManager __instance, int id, ref string __result)
+        {
+            if (_waxTechId < 0)
+            {
+                foreach (TechTreeNodeData node in __instance.techTreeNodeData)
+                {
+                    if (node.gameEffectsEntries == null) continue;
+                    foreach (GameEffectEntry entry in node.gameEffectsEntries)
+                    {
+                        if (!(entry.gameEffect is GE_ManufacturingSourceItemModify geModify)) continue;
+                        if (Traverse.Create(geModify).Field("itemName").GetValue<string>() != "ItemWax") continue;
+                        _waxTechId = node.GetId();
+                        break;
+                    }
+                    if (_waxTechId >= 0) break;
+                }
+            }
+            if (id != _waxTechId || _waxTechId < 0) return;
+            string lang = I2.Loc.LocalizationManager.CurrentLanguage ?? "English";
+            if (!_waxLoc.TryGetValue(lang, out string text))
+                text = _waxLoc["English"];
+            __result += "\n\n<b>[Mod] " + string.Format(text, RuntimeConfig.MaxWaxPerBarrel) + "</b>";
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -508,6 +569,7 @@ namespace TechRankExpanderMod
         private MelonPreferences_Entry<bool>   _resetEntry;
         private MelonPreferences_Entry<string>  _kpHotkeyEntry;
         private MelonPreferences_Entry<int>     _kpHotkeyAmountEntry;
+        private MelonPreferences_Entry<int>     _maxWaxEntry;
         private readonly Dictionary<string, MelonPreferences_Entry<int>> _rankEntries =
             new Dictionary<string, MelonPreferences_Entry<int>>();
 
@@ -550,6 +612,13 @@ namespace TechRankExpanderMod
                 display_name: "KP Hotkey Amount",
                 description: "How many knowledge points to add per key press.");
 
+            _maxWaxEntry = _cat.CreateEntry(
+                "Max_Wax_Per_Barrel", 2,
+                display_name: "Max Wax Per Barrel (Wax-Sealed Barrels)",
+                description: "Maximum wax (ItemWax) consumed per barrel production. " +
+                             "1 = always 1 wax, 2 = capped at vanilla rank-1 value (default), " +
+                             "0 = removes wax from the recipe entirely.");
+
             foreach (var kv in TechDefaults.DefaultRanks)
             {
                 string key = "Ranks_" + kv.Key
@@ -589,6 +658,7 @@ namespace TechRankExpanderMod
                 RuntimeConfig.KpHotkey = KeyCode.F8;
             }
             RuntimeConfig.KpHotkeyAmount = Mathf.Max(1, _kpHotkeyAmountEntry.Value);
+            RuntimeConfig.MaxWaxPerBarrel = Mathf.Max(0, _maxWaxEntry.Value);
         }
 
         // Called from Patch_TechTreeManager_Load after the reset completes,
