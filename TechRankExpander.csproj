@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath>..\..\..\Farthest Frontier (Mono)\Mods\</OutputPath>
+    <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Release\**" />
+  </ItemGroup>
+
+  <!-- MelonLoader / Harmony -->
+  <ItemGroup>
+    <Reference Include="MelonLoader">
+      <HintPath>..\..\..\Farthest Frontier (Mono)\MelonLoader\net35\MelonLoader.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\Farthest Frontier (Mono)\MelonLoader\net35\0Harmony.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <!-- Unity / Game assemblies -->
+  <ItemGroup>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\..\Farthest Frontier (Mono)\Farthest Frontier_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\..\Farthest Frontier (Mono)\Farthest Frontier_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\Farthest Frontier (Mono)\Farthest Frontier_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>..\..\..\Farthest Frontier (Mono)\Farthest Frontier_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="DeleteUnwantedOutputs" AfterTargets="Build">
+    <Delete Files="$(OutputPath)$(AssemblyName).deps.json" />
+    <Delete Files="$(OutputPath)$(AssemblyName).runtimeconfig.json" />
+    <Delete Files="$(OutputPath)$(AssemblyName).pdb" />
+  </Target>
+
+</Project>
