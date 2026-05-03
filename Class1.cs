@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.4.1", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.5.0", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -387,6 +387,42 @@ namespace TechRankExpanderMod
     }
     // ──────────────────────────────────────────────────────────────────────────
 
+    // ── NumRanks field writer ────────────────────────────────────────────────
+    // GetNumRanks() is a trivial one-liner (return numRanks) that the Mono JIT
+    // frequently inlines, so our Harmony Postfix on GetNumRanks() is bypassed in
+    // call sites like GetNumKnowledgePointsRemaining() and ActivateTechOrRank().
+    // When GetNumKnowledgePointsRemaining() reads the original (vanilla) numRanks,
+    // it computes a cap equal to the vanilla total (~152) instead of the extended
+    // total, causing the Academy to stop generating KP once 152 points accumulate.
+    // Fix: write the override value directly into the numRanks private field on
+    // every TechTreeNodeData instance so all code paths see the extended count.
+    internal static class NumRanksHelper
+    {
+        private static System.Reflection.FieldInfo _field;
+
+        internal static void Apply(TechTreeManager ttm)
+        {
+            if (_field == null)
+                _field = typeof(TechTreeNodeData).GetField(
+                    "numRanks",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+            if (_field == null || ttm?.techTreeNodeData == null) return;
+
+            int count = 0;
+            foreach (var tech in ttm.techTreeNodeData)
+            {
+                if (RuntimeConfig.ActiveRanks.TryGetValue(tech.GetTechName(), out int overrideRanks))
+                {
+                    _field.SetValue(tech, overrideRanks);
+                    count++;
+                }
+            }
+            MelonLogger.Msg($"[TechRankExpander] numRanks written on {count} tech nodes (JIT inline fix).");
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     // ── Patch: TechTreeManager.Awake ─────────────────────────────────────────
     // Awake() sets kpUnitsGenerationMultiplier from difficulty level.
     // We add (mult-1) on top so the net effect is exactly mult× speed.
@@ -395,6 +431,10 @@ namespace TechRankExpanderMod
     {
         static void Postfix(TechTreeManager __instance)
         {
+            // Write numRanks directly so inlined GetNumRanks() calls also see
+            // the extended caps (fixes Academy KP cap at vanilla ~152 limit).
+            NumRanksHelper.Apply(__instance);
+
             float kpMult = RuntimeConfig.KpSpeedMultiplier;
             if (kpMult > 1f)
             {
@@ -644,7 +684,7 @@ namespace TechRankExpanderMod
             RefreshRuntimeConfig();
 
             MelonLogger.Msg("[TechRankExpander] Config ready -> UserData/TechRankExpander.cfg");
-            MelonLogger.Msg($"[TechRankExpander] Patching GetNumRanks() for {RuntimeConfig.ActiveRanks.Count} techs, KP x{RuntimeConfig.KpSpeedMultiplier}");
+            MelonLogger.Msg($"[TechRankExpander] Ready — {RuntimeConfig.ActiveRanks.Count} techs extended, KP x{RuntimeConfig.KpSpeedMultiplier}");
         }
 
         private void RefreshRuntimeConfig()
