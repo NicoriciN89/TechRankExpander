@@ -2,6 +2,20 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.5.0] — 2026-05-03
+
+### Fixed
+- **Academy stops at 152 KP** — `GetNumRanks()` is a trivial one-liner that the
+  Mono JIT inlines in `GetNumKnowledgePointsRemaining()` and `ActivateTechOrRank()`,
+  bypassing the Harmony Postfix patch. As a result those methods used the original
+  vanilla rank counts (~152 total), causing the Academy to stop generating KP once
+  the player had 152 unspent knowledge points. The fix writes the configured rank
+  value directly into the private `numRanks` field on every `TechTreeNodeData`
+  instance during `TechTreeManager.Awake()`, so all code paths (inlined or not) see
+  the extended counts.
+
+---
+
 ## [1.4.0] — 2026-04-26
 
 ### Added
