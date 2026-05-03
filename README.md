@@ -105,21 +105,25 @@ Valid `KP_Hotkey` values are [UnityEngine.KeyCode](https://docs.unity3d.com/Scri
 
 **Requirements:** .NET SDK, Farthest Frontier v1.1.0 with MelonLoader installed.
 
-The `.csproj` references game and MelonLoader DLLs by relative path, so the repo must be cloned into a folder **next to** the game directory:
+The `.csproj` references game and MelonLoader DLLs by relative path, so the repo must be cloned into a `ModProject` folder **inside** the game directory:
 
 ```
-games/
+Farthest.Frontier.v1.1.0/
 ├── Farthest Frontier (Mono)/    ← game installation
 └── ModProject/
-    └── TechRankExpander/
-        └── _src/                ← clone here
+    └── TechRankExpander/        ← clone here
+        ├── Class1.cs
+        ├── TechRankExpander.csproj
+        └── ...
 ```
 
 ```powershell
+mkdir ModProject
+cd ModProject
 git clone https://github.com/NicoriciN89/TechRankExpander.git
-cd TechRankExpander/_src
+cd TechRankExpander
 dotnet build -c Release
-# Output: ../../Farthest Frontier (Mono)/Mods/TechRankExpander.dll
+# Output: ..\..\Farthest Frontier (Mono)\Mods\TechRankExpander.dll
 ```
 
 ---
