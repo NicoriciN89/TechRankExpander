@@ -16,6 +16,13 @@ All notable changes to TechRankExpander are documented here.
 
 ---
 
+## [1.4.1] — 2026-04-28
+
+### Added
+- Russian translations for all config entry descriptions (bilingual EN / RU in the config file).
+
+---
+
 ## [1.4.0] — 2026-04-26
 
 ### Added
