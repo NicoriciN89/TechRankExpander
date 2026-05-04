@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.0", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.1", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -35,7 +35,7 @@ namespace TechRankExpanderMod
             { "Alcohol Sterilization",           20 },
             { "Beautification",                  20 },
             { "Masonry",                          5 },  // -25% bricks per rank; at 4 ranks = -100% (free buildings)
-            { "Civic Inspections",               20 },
+            { "Civic Inspections",                3 },  // -30% firefighter work per rank; rank 4 = -120% (negative work time → firefighters stop working)
             { "Military Logistics",               9 },  // -10% item work per rank; >9 makes crafting work negative
             { "Horse Armor",                     20 },
             { "Wheel-Lock Crossbow",             20 },

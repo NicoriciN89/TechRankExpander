@@ -2,6 +2,16 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.7.1] — 2026-05-04
+
+### Fixed
+- **Civic Inspections** cap lowered from 20 to **3**. Each rank reduces firefighter
+  work time by −30%; rank 4 would produce −120% (negative work time), causing
+  firefighters to stop working entirely. Rank 3 = −90% (10% work time remaining)
+  is the safe maximum.
+
+---
+
 ## [1.7.0] — 2026-05-04
 
 ### Added
