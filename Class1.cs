@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.3", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.4", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -233,6 +233,60 @@ namespace TechRankExpanderMod
             if (!_waxLoc.TryGetValue(lang, out string text))
                 text = _waxLoc["English"];
             __result += "\n\n<b>[Mod] " + string.Format(text, RuntimeConfig.MaxWaxPerBarrel) + "</b>";
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // ── Patch: Deep Wells tooltip ──────────────────────────────────────────────
+    // Appends the configured water-volume bonus to the Deep Wells description.
+    [HarmonyPatch(typeof(TechTreeManager), "GetTechTreeNodeDescription")]
+    internal static class Patch_GetTechTreeNodeDescription_DeepWells
+    {
+        private static readonly Dictionary<string, (string label, string perRank, string current, string next, string max)> _loc =
+            new Dictionary<string, (string, string, string, string, string)>
+        {
+            ["English"]               = ("Well capacity",         "per rank",        "current",         "next rank",       "max rank"),
+            ["Russian"]               = ("Емкость колодца",      "за ранг",          "сейчас",            "след. ранг",       "макс. ранг"),
+            ["Ukrainian"]             = ("ємність колодязя",    "за ранг",          "зараз",             "наст. ранг",      "макс. ранг"),
+            ["German"]                = ("Brunnenkapazität",      "pro Rang",         "aktuell",          "nächster Rang",   "max Rang"),
+            ["French"]                = ("Capacité du puits",    "par rang",         "actuel",           "rang suivant",    "rang max"),
+            ["Spanish"]               = ("Capacidad del pozo",   "por rango",        "actual",           "rango siguiente", "rango máx."),
+            ["Italian"]               = ("Capac. del pozzo",     "per rango",        "attuale",          "prossimo rango",  "rango max"),
+            ["Portuguese"]            = ("Capacidade do poço",  "por nível",        "atual",             "próximo nível",   "nível máx."),
+            ["Polish"]                = ("Pojemność studni",     "na poziom",        "obecnie",          "nast. poziom",    "maks. poziom"),
+            ["Czech"]                 = ("Kapacita studny",      "za úroveň",        "aktuálně",         "další úroveň",    "max. úroveň"),
+            ["Swedish"]               = ("Brunnens kapacitet",   "per rank",         "nuvarande",        "nästa rank",      "max rank"),
+            ["Chinese (Simplified)"]  = ("井的容量",             "每级",              "当前",              "下一级",          "最高级"),
+            ["Chinese (Traditional)"] = ("井的容量",             "每級",              "目前",              "下一級",          "最高級"),
+            ["Japanese"]              = ("井の割増量",          "ランクごと",        "現在",              "次のランク",      "最大ランク"),
+            ["Korean"]                = ("우물 용량",            "등급당",           "현재",              "다음 등급",       "최대 등급"),
+        };
+
+        static void Postfix(TechTreeManager __instance, int id, ref string __result)
+        {
+            int bonus = RuntimeConfig.DeepWellsWaterVolumePerRank;
+            if (bonus <= 0) return;
+
+            var tech = __instance.techTreeNodeData.Find(x => x.GetId() == id);
+            if (tech == null || tech.GetTechName() != "Deep Wells") return;
+
+            string lang = I2.Loc.LocalizationManager.CurrentLanguage ?? "English";
+            if (!_loc.TryGetValue(lang, out var s)) s = _loc["English"];
+
+            int maxRanks  = tech.GetNumRanks();
+            int curRank   = tech.curRank;
+            int curBonus  = curRank * bonus;
+            int nextBonus = (curRank + 1) * bonus;
+
+            string line;
+            if (curRank == 0)
+                line = $"\n\n<b>[Mod] {s.label}: <color=#6ECFF6>+{nextBonus}</color> {s.perRank} ({s.next})</b>";
+            else if (curRank < maxRanks)
+                line = $"\n\n<b>[Mod] {s.label}: <color=#6ECFF6>+{curBonus}</color> ({s.current}) / <color=#6ECFF6>+{nextBonus}</color> {s.perRank} ({s.next})</b>";
+            else
+                line = $"\n\n<b>[Mod] {s.label}: <color=#6ECFF6>+{curBonus}</color> ({s.max})</b>";
+
+            __result += line;
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
