@@ -2,6 +2,22 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.7.0] — 2026-05-04
+
+### Added
+- **Deep Wells — bonus water volume per rank** — new config entry
+  `Deep_Wells_Water_Volume_Per_Rank` (default: 50). Every well gains
+  `rank × bonus` extra water capacity when the map loads.
+  Example: 5 ranks × 50 = +250 capacity (basic well 100 → 350,
+  upgraded well 300 → 550). Set to 0 to disable.
+- **Sheet Composting — configurable ranks** — added to the tech rank
+  table with a default of 3 ranks. Each rank gives +1 worker slot and
+  -30% compost production work at the Compost Yard. Config key:
+  `Ranks_Sheet_Composting` (default: 3; capped at 3 to keep work
+  time ≥ 10%, raise at your own risk).
+
+---
+
 ## [1.6.0] — 2026-05-04
 
 ### Added

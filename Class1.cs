@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.6.0", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.0", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -83,7 +83,7 @@ namespace TechRankExpanderMod
             { "Venting Chambers",                6 },  // -15% item work per rank; >6 makes crafting work negative
             { "Stonecutting",                     5 },  // -20% per rank; >5 makes mining time negative
             { "Woodlore",                        20 },
-            // "Sheet Composting" excluded — has no additional effect beyond unlocking the building
+            { "Sheet Composting",                 3 },  // +1 worker slot & -30% compost work per rank; >3 makes work time zero/negative
         };
     }
 
@@ -95,10 +95,48 @@ namespace TechRankExpanderMod
         internal static float WorkSpeedPerRank = 0.01f;  // +1% work speed per rank of Production Management
         internal static bool ResetTechTree = false;
         internal static bool AllotAllTechs = false;
+        internal static int DeepWellsWaterVolumePerRank = 50;
         internal static KeyCode KpHotkey = KeyCode.F8;
         internal static int KpHotkeyAmount = 1;
         internal static int MaxWaxPerBarrel = 2;
     }
+
+    // ── Patch: Well.Start — Deep Wells water capacity bonus ───────────────────
+    // After Well.Start() initialises the well (including the first SafeAddWater call),
+    // we apply a flat bonus to the private `maxWater` field equal to:
+    //     Deep Wells curRank × DeepWellsWaterVolumePerRank
+    // The well's storage cap is governed solely by `maxWater`, so existing wells
+    // will gradually fill to the new maximum over time.  New wells start at the
+    // initial water value and fill up from there.
+    [HarmonyPatch(typeof(Well), "Start")]
+    internal static class Patch_WellStart
+    {
+        private static System.Reflection.FieldInfo _maxWaterField;
+
+        static void Postfix(Well __instance)
+        {
+            int bonus = RuntimeConfig.DeepWellsWaterVolumePerRank;
+            if (bonus <= 0) return;
+
+            var gm = UnitySingleton<GameManager>.Instance;
+            if (gm?.techTreeManager?.techTreeNodeData == null) return;
+
+            var tech = gm.techTreeManager.techTreeNodeData.Find(x => x.GetTechName() == "Deep Wells");
+            if (tech == null || tech.curRank <= 0) return;
+
+            if (_maxWaterField == null)
+                _maxWaterField = typeof(Well).GetField(
+                    "maxWater",
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (_maxWaterField == null) return;
+
+            int current = (int)_maxWaterField.GetValue(__instance);
+            int newMax  = current + tech.curRank * bonus;
+            _maxWaterField.SetValue(__instance, newMax);
+            MelonLogger.Msg($"[TechRankExpander] Well '{__instance.name}' maxWater: {current} -> {newMax} (Deep Wells rank {tech.curRank})");
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
 
     // ── Patch: Villager.GetCarryCapacity ──────────────────────────────────────
     // Multiplies the final carry weight so villagers can haul more per trip.
@@ -642,6 +680,7 @@ namespace TechRankExpanderMod
         private MelonPreferences_Entry<float> _workSpeedEntry;
         private MelonPreferences_Entry<bool>   _resetEntry;
         private MelonPreferences_Entry<bool>   _allotEntry;
+        private MelonPreferences_Entry<int>     _deepWellsWaterEntry;
         private MelonPreferences_Entry<string>  _kpHotkeyEntry;
         private MelonPreferences_Entry<int>     _kpHotkeyAmountEntry;
         private MelonPreferences_Entry<int>     _maxWaxEntry;
@@ -685,6 +724,16 @@ namespace TechRankExpanderMod
                 description: "Set to true to instantly fill ALL tech ranks to their configured caps on the next map load (spends KP). "
                            + "The flag is automatically cleared after applying. "
                            + "/ Установите true, чтобы при следующей загрузке карты все ранги технологий были выкуплены до максимума (тратит ОЗ). Флаг очищается автоматически.");
+
+            _deepWellsWaterEntry = _cat.CreateEntry(
+                "Deep_Wells_Water_Volume_Per_Rank", 50,
+                display_name: "Deep Wells — Bonus Water Volume Per Rank",
+                description: "Extra water capacity added to every well per rank of the 'Deep Wells' technology. "
+                           + "50 = +50 water per rank (e.g. rank 5 → +250 capacity). 0 = disabled. "
+                           + "Bonus is applied when the map loads; buy more ranks and reload to see the change. "
+                           + "/ Дополнительный объём воды в каждом колодце за каждый ранг технологии 'Глубокие колодцы'. "
+                           + "50 = +50 воды за ранг (например, 5 рангов → +250 ёмкости). 0 = отключено. "
+                           + "Бонус применяется при загрузке карты; купите ещё рангов и перезагрузите карту.");
 
             _kpHotkeyEntry = _cat.CreateEntry(
                 "KP_Hotkey", "F8",
@@ -739,6 +788,7 @@ namespace TechRankExpanderMod
             RuntimeConfig.WorkSpeedPerRank        = _workSpeedEntry.Value;
             RuntimeConfig.ResetTechTree           = _resetEntry?.Value ?? false;
             RuntimeConfig.AllotAllTechs           = _allotEntry?.Value ?? false;
+            RuntimeConfig.DeepWellsWaterVolumePerRank = _deepWellsWaterEntry?.Value ?? 50;
 
             if (System.Enum.TryParse(_kpHotkeyEntry.Value, true, out KeyCode kc))
                 RuntimeConfig.KpHotkey = kc;
