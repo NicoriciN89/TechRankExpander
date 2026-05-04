@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.8.0", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.8.1", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -74,7 +74,8 @@ namespace TechRankExpanderMod
             { "Artificial Selection",            20 },
             { "Mortar-Reinforced Palisades",     20 },
             { "Trailblazing",                    20 },
-            { "Hygiene",                         20 },
+            // Hygiene capped at 4 in code — not configurable (rank 5+ breaks disease probability)
+            // { "Hygiene",                         20 },
             { "Spotters",                        20 },
             { "Defensive Barricades",            20 },
             { "Militia",                         20 },
@@ -899,6 +900,9 @@ namespace TechRankExpanderMod
             RuntimeConfig.ActiveRanks["Civic Inspections"] = 3;
             // Sheet Composting: -30% compost work per rank; rank 4+ = negative work time → Compost Yard breaks.
             RuntimeConfig.ActiveRanks["Sheet Composting"] = 3;
+            // Hygiene: each rank is -25% disease probability; rank 4 = -100% (fully eliminated).
+            // Rank 5+ would produce negative probability values, breaking disease mechanics.
+            RuntimeConfig.ActiveRanks["Hygiene"] = 4;
 
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;
