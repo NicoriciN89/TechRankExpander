@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.2", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.3", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -84,7 +84,8 @@ namespace TechRankExpanderMod
             { "Venting Chambers",                6 },  // -15% item work per rank; >6 makes crafting work negative
             { "Stonecutting",                     5 },  // -20% per rank; >5 makes mining time negative
             { "Woodlore",                        20 },
-            { "Sheet Composting",                 3 },  // +1 worker slot & -30% compost work per rank; >3 makes work time zero/negative
+            // "Sheet Composting" hardcoded to 3 in code — NOT configurable.
+            // Each rank is -30% compost work time; rank 4 = -120% (negative) breaks the Compost Yard.
         };
     }
 
@@ -788,6 +789,8 @@ namespace TechRankExpanderMod
             // Hard-coded caps — not exposed in config to prevent game-breaking bugs.
             // Civic Inspections: -30% firefighter work per rank; rank 4+ = negative work time → firefighters stop.
             RuntimeConfig.ActiveRanks["Civic Inspections"] = 3;
+            // Sheet Composting: -30% compost work per rank; rank 4+ = negative work time → Compost Yard breaks.
+            RuntimeConfig.ActiveRanks["Sheet Composting"] = 3;
 
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;

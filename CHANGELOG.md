@@ -2,6 +2,16 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.7.3] — 2026-05-04
+
+### Changed
+- **Sheet Composting** removed from the config file. The cap of 3 is now hardcoded
+  in code (same reason as Civic Inspections: each rank is −30% work time; rank 4+
+  produces negative work time, breaking the Compost Yard). Any existing
+  `Ranks_Sheet_Composting` line in a user's config is silently ignored.
+
+---
+
 ## [1.7.2] — 2026-05-04
 
 ### Changed
