@@ -2,6 +2,17 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.8.1] — 2026-05-04
+
+### Changed
+- **Hygiene** capped at rank 4 and removed from the config file.
+  Each rank reduces disease probability by −25%; rank 4 = −100% (fully eliminated).
+  Rank 5+ would produce negative probability values, potentially breaking the
+  disease-spread mechanic. Any existing `Ranks_Hygiene` line in the config is
+  silently ignored from this version onward.
+
+---
+
 ## [1.8.0] — 2026-05-05
 
 ### Changed
