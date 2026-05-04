@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.5.0", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.6.0", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -94,6 +94,7 @@ namespace TechRankExpanderMod
         internal static float CarryCapacityMultiplier = 3f;
         internal static float WorkSpeedPerRank = 0.01f;  // +1% work speed per rank of Production Management
         internal static bool ResetTechTree = false;
+        internal static bool AllotAllTechs = false;
         internal static KeyCode KpHotkey = KeyCode.F8;
         internal static int KpHotkeyAmount = 1;
         internal static int MaxWaxPerBarrel = 2;
@@ -314,6 +315,7 @@ namespace TechRankExpanderMod
     internal static class TechResetHelper
     {
         internal static int AccumulatedKpRefund = 0;
+        internal static int AccumulatedKpCost   = 0;
         internal static bool InTechManagerLoad = false;
     }
 
@@ -336,6 +338,23 @@ namespace TechRankExpanderMod
                 TechResetHelper.AccumulatedKpRefund += __instance.curRank;
                 __instance.curRank = 0;
                 __instance.state = TechTreeNodeData.State.Locked;
+            }
+            else if (RuntimeConfig.AllotAllTechs)
+            {
+                // ── Allot All: fill every tech to its configured cap ──────────
+                // Symmetric to ResetTechTree: instead of zeroing ranks and refunding KP,
+                // we maximise ranks and deduct the KP cost on load.
+                int cap = __instance.GetNumRanks(); // mod-patched value
+                if (__instance.curRank < cap)
+                {
+                    TechResetHelper.AccumulatedKpCost += cap - __instance.curRank;
+                    __instance.curRank = cap;
+                    __instance.state = TechTreeNodeData.State.Active;
+                }
+                else if (__instance.curRank >= cap)
+                {
+                    __instance.state = TechTreeNodeData.State.Active;
+                }
             }
             else
             {
@@ -382,6 +401,21 @@ namespace TechRankExpanderMod
                 TechRankExpander.Instance?.ClearResetFlag();
                 __instance.UpdatePrereqNodes(true);
                 MelonLogger.Msg("[TechRankExpander] Tech tree fully reset. Reload the tech tree UI to see changes.");
+            }
+
+            if (RuntimeConfig.AllotAllTechs)
+            {
+                // Deduct the KP cost (clamped to 0 — never go negative).
+                int cost = Mathf.Min(TechResetHelper.AccumulatedKpCost, __instance.knowledgePoints);
+                __instance.knowledgePoints -= cost;
+                MelonLogger.Msg($"[TechRankExpander] Allot All: filled all techs to cap, spent {cost} KP "
+                    + $"(remaining: {__instance.knowledgePoints}).");
+                TechResetHelper.AccumulatedKpCost = 0;
+
+                RuntimeConfig.AllotAllTechs = false;
+                TechRankExpander.Instance?.ClearAllotFlag();
+                __instance.UpdatePrereqNodes(true);
+                TechBuildingHelper.ActivateTechBuildings();
             }
         }
     }
@@ -607,6 +641,7 @@ namespace TechRankExpanderMod
         private MelonPreferences_Entry<float> _carryCapEntry;
         private MelonPreferences_Entry<float> _workSpeedEntry;
         private MelonPreferences_Entry<bool>   _resetEntry;
+        private MelonPreferences_Entry<bool>   _allotEntry;
         private MelonPreferences_Entry<string>  _kpHotkeyEntry;
         private MelonPreferences_Entry<int>     _kpHotkeyAmountEntry;
         private MelonPreferences_Entry<int>     _maxWaxEntry;
@@ -643,6 +678,13 @@ namespace TechRankExpanderMod
                 description: "Set to true to refund ALL spent KP and reset ALL tech ranks on the next map load. "
                            + "The flag is automatically cleared after applying. "
                            + "/ Установите true для возврата всех потраченных ОЗ и сброса всех рангов технологий при следующей загрузке карты. Флаг очищается автоматически.");
+
+            _allotEntry = _cat.CreateEntry(
+                "Allot_All_Techs", false,
+                display_name: "Allot All Techs",
+                description: "Set to true to instantly fill ALL tech ranks to their configured caps on the next map load (spends KP). "
+                           + "The flag is automatically cleared after applying. "
+                           + "/ Установите true, чтобы при следующей загрузке карты все ранги технологий были выкуплены до максимума (тратит ОЗ). Флаг очищается автоматически.");
 
             _kpHotkeyEntry = _cat.CreateEntry(
                 "KP_Hotkey", "F8",
@@ -696,6 +738,7 @@ namespace TechRankExpanderMod
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;
             RuntimeConfig.WorkSpeedPerRank        = _workSpeedEntry.Value;
             RuntimeConfig.ResetTechTree           = _resetEntry?.Value ?? false;
+            RuntimeConfig.AllotAllTechs           = _allotEntry?.Value ?? false;
 
             if (System.Enum.TryParse(_kpHotkeyEntry.Value, true, out KeyCode kc))
                 RuntimeConfig.KpHotkey = kc;
@@ -716,6 +759,15 @@ namespace TechRankExpanderMod
             _resetEntry.Value = false;
             _cat.SaveToFile();
             MelonLogger.Msg("[TechRankExpander] Reset_Tech_Tree flag cleared in config.");
+        }
+
+        // Called from Patch_TechTreeManager_Load after allot-all completes.
+        internal void ClearAllotFlag()
+        {
+            if (_allotEntry == null) return;
+            _allotEntry.Value = false;
+            _cat.SaveToFile();
+            MelonLogger.Msg("[TechRankExpander] Allot_All_Techs flag cleared in config.");
         }
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)

@@ -2,6 +2,16 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.6.0] — 2026-05-04
+
+### Added
+- **Allot All Techs** — set `Allot_All_Techs = true` in the config, load your save
+  once, and every technology is automatically filled to its configured rank cap,
+  spending KP in the process. The flag clears itself automatically after the first
+  load. This is the exact opposite of `Reset_Tech_Tree`.
+
+---
+
 ## [1.5.0] — 2026-05-03
 
 ### Fixed
