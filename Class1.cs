@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.4", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.8.0", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -103,6 +103,28 @@ namespace TechRankExpanderMod
         internal static int MaxWaxPerBarrel = 2;
     }
 
+    // ── Tech lookup cache ──────────────────────────────────────────────────────────────────
+    // Built once in TechTreeManagerAwake so all patches can do O(1) lookups
+    // instead of O(n) List.Find() scans every time.
+    internal static class TechCache
+    {
+        internal static readonly Dictionary<int,    TechTreeNodeData> ById   = new Dictionary<int,    TechTreeNodeData>();
+        internal static readonly Dictionary<string, TechTreeNodeData> ByName = new Dictionary<string, TechTreeNodeData>();
+
+        internal static void Build(TechTreeManager ttm)
+        {
+            ById.Clear();
+            ByName.Clear();
+            if (ttm?.techTreeNodeData == null) return;
+            foreach (var t in ttm.techTreeNodeData)
+            {
+                ById[t.GetId()]        = t;
+                ByName[t.GetTechName()] = t;
+            }
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
     // ── Patch: Well.Start — Deep Wells water capacity bonus ───────────────────
     // After Well.Start() initialises the well (including the first SafeAddWater call),
     // we apply a flat bonus to the private `maxWater` field equal to:
@@ -120,11 +142,7 @@ namespace TechRankExpanderMod
             int bonus = RuntimeConfig.DeepWellsWaterVolumePerRank;
             if (bonus <= 0) return;
 
-            var gm = UnitySingleton<GameManager>.Instance;
-            if (gm?.techTreeManager?.techTreeNodeData == null) return;
-
-            var tech = gm.techTreeManager.techTreeNodeData.Find(x => x.GetTechName() == "Deep Wells");
-            if (tech == null || tech.curRank <= 0) return;
+            if (!TechCache.ByName.TryGetValue("Deep Wells", out var tech) || tech.curRank <= 0) return;
 
             if (_maxWaterField == null)
                 _maxWaterField = typeof(Well).GetField(
@@ -147,7 +165,9 @@ namespace TechRankExpanderMod
     {
         static void Postfix(ref float __result)
         {
-            __result *= RuntimeConfig.CarryCapacityMultiplier;
+            float m = RuntimeConfig.CarryCapacityMultiplier;
+            if (m == 1f) return;
+            __result *= m;
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -162,13 +182,26 @@ namespace TechRankExpanderMod
     [HarmonyPatch(typeof(GE_ManufacturingSourceItemModify), "UpdateItemDef")]
     internal static class Patch_GE_ManufacturingSourceItemModify_UpdateItemDef
     {
+        internal static System.Reflection.FieldInfo _itemNameField;
+        private  static System.Reflection.FieldInfo _manuDefField;
+
         static void Prefix(GE_ManufacturingSourceItemModify __instance, ref float modify)
         {
             if (modify <= 0f) return;
-            string itemName = Traverse.Create(__instance).Field("itemName").GetValue<string>();
+
+            if (_itemNameField == null)
+            {
+                var t = typeof(GE_ManufacturingSourceItemModify);
+                _itemNameField = t.GetField("itemName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                _manuDefField  = t.GetField("manuDef",  System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            }
+
+            string itemName = _itemNameField?.GetValue(__instance) as string;
             if (itemName != "ItemWax") return;
-            ManufactureDefinition manuDef = Traverse.Create(__instance).Field("manuDef").GetValue<ManufactureDefinition>();
+
+            ManufactureDefinition manuDef = _manuDefField?.GetValue(__instance) as ManufactureDefinition;
             if (manuDef == null) return;
+
             int currentTotal = 0;
             foreach (SourceItemDefinition sourceItem in manuDef.sourceItems)
             {
@@ -221,7 +254,11 @@ namespace TechRankExpanderMod
                     foreach (GameEffectEntry entry in node.gameEffectsEntries)
                     {
                         if (!(entry.gameEffect is GE_ManufacturingSourceItemModify geModify)) continue;
-                        if (Traverse.Create(geModify).Field("itemName").GetValue<string>() != "ItemWax") continue;
+                        // Use cached FieldInfo for itemName
+                        string iName = Patch_GE_ManufacturingSourceItemModify_UpdateItemDef
+                            ._itemNameField?.GetValue(geModify) as string
+                            ?? Traverse.Create(geModify).Field("itemName").GetValue<string>();
+                        if (iName != "ItemWax") continue;
                         _waxTechId = node.GetId();
                         break;
                     }
@@ -242,6 +279,8 @@ namespace TechRankExpanderMod
     [HarmonyPatch(typeof(TechTreeManager), "GetTechTreeNodeDescription")]
     internal static class Patch_GetTechTreeNodeDescription_DeepWells
     {
+        private static int _deepWellsTechId = -1;
+
         private static readonly Dictionary<string, (string label, string perRank, string current, string next, string max)> _loc =
             new Dictionary<string, (string, string, string, string, string)>
         {
@@ -267,8 +306,15 @@ namespace TechRankExpanderMod
             int bonus = RuntimeConfig.DeepWellsWaterVolumePerRank;
             if (bonus <= 0) return;
 
-            var tech = __instance.techTreeNodeData.Find(x => x.GetId() == id);
-            if (tech == null || tech.GetTechName() != "Deep Wells") return;
+            // Cache the Deep Wells tech ID on first call (O(1) lookup from then on)
+            if (_deepWellsTechId < 0)
+            {
+                if (TechCache.ByName.TryGetValue("Deep Wells", out var found))
+                    _deepWellsTechId = found.GetId();
+            }
+            if (id != _deepWellsTechId || _deepWellsTechId < 0) return;
+
+            if (!TechCache.ById.TryGetValue(id, out var tech)) return;
 
             string lang = I2.Loc.LocalizationManager.CurrentLanguage ?? "English";
             if (!_loc.TryGetValue(lang, out var s)) s = _loc["English"];
@@ -319,8 +365,8 @@ namespace TechRankExpanderMod
             __result = true;
             foreach (int id in prereqIds)
             {
-                var prereq = __instance.techTreeNodeData.Find(x => x.GetId() == id);
-                if (prereq == null || prereq.curRank < 1)
+                // O(1) cache lookup instead of O(n) List.Find
+                if (!TechCache.ById.TryGetValue(id, out var prereq) || prereq.curRank < 1)
                 {
                     __result = false;
                     break;
@@ -342,15 +388,12 @@ namespace TechRankExpanderMod
         {
             if (!onLoad)
             {
-                // force: true so both Locked AND Unlocked techs are re-evaluated.
-                // Without this, a tech stuck in Unlocked state (e.g. Monument)
-                // would never be promoted to PrereqsMet.
                 __instance.UpdatePrereqNodes(true);
             }
             else
             {
-                var tech = __instance.techTreeNodeData.Find(x => x.GetId() == id);
-                if (tech != null && tech.curRank >= 1)
+                // O(1) cache lookup
+                if (TechCache.ById.TryGetValue(id, out var tech) && tech.curRank >= 1)
                 {
                     var gm = UnitySingleton<GameManager>.Instance;
                     gm?.buildManager?.ActivateTech(id);
@@ -537,6 +580,9 @@ namespace TechRankExpanderMod
 
             if (_field == null || ttm?.techTreeNodeData == null) return;
 
+            // Build the fast lookup cache while we iterate the tech list anyway
+            TechCache.Build(ttm);
+
             int count = 0;
             foreach (var tech in ttm.techTreeNodeData)
             {
@@ -546,7 +592,7 @@ namespace TechRankExpanderMod
                     count++;
                 }
             }
-            MelonLogger.Msg($"[TechRankExpander] numRanks written on {count} tech nodes (JIT inline fix).");
+            MelonLogger.Msg($"[TechRankExpander] numRanks written on {count} tech nodes; cache built ({TechCache.ById.Count} entries).");
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -612,8 +658,9 @@ namespace TechRankExpanderMod
         static void Postfix(TechTreeManager __instance, int id, ref string __result)
         {
             if (RuntimeConfig.WorkSpeedPerRank <= 0f) return;
-            var tech = __instance.techTreeNodeData.Find(x => x.GetId() == id);
-            if (tech == null || tech.GetTechName() != "Production Management") return;
+            // O(1) lookup via cache
+            if (!TechCache.ById.TryGetValue(id, out var tech)) return;
+            if (tech.GetTechName() != "Production Management") return;
 
             int maxRanks = tech.GetNumRanks();
             float perRank = RuntimeConfig.WorkSpeedPerRank * 100f;
@@ -705,10 +752,17 @@ namespace TechRankExpanderMod
 
             var gm = UnitySingleton<GameManager>.Instance;
             if (gm?.happinessManager == null) return;
-            if (ttm.techTreeNodeData == null) return;
 
-            var tech = ttm.techTreeNodeData.Find(x => x.GetTechName() == "Production Management");
-            int ranks = (tech != null) ? tech.curRank : 0;
+            // O(1) lookup via cache; fall back to linear scan if cache not ready yet
+            int ranks = 0;
+            if (TechCache.ByName.TryGetValue("Production Management", out var tech))
+                ranks = tech.curRank;
+            else if (ttm?.techTreeNodeData != null)
+            {
+                var t = ttm.techTreeNodeData.Find(x => x.GetTechName() == "Production Management");
+                if (t != null) ranks = t.curRank;
+            }
+
             float targetBonus = ranks * RuntimeConfig.WorkSpeedPerRank;
             float delta = targetBonus - _appliedBonus;
 

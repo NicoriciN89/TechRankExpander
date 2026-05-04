@@ -2,6 +2,29 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.8.0] — 2026-05-05
+
+### Changed
+- **Performance optimisation** — eliminated all O(n) linear `List.Find()` scans
+  on the tech-node list that were executing on every prereq check, every rank
+  purchase, every tooltip open, and on every well that loads.
+  - Added `TechCache` (built once in `TechTreeManager.Awake`): two dictionaries
+    keyed by tech ID and by tech name so any lookup is now O(1).
+  - `ArePrereqNodesActive` (the hottest path — called for every tech node on the
+    UI) now uses `TechCache.ById` instead of iterating the whole list each call.
+  - `ActivateTechOrRank`, `GetTechTreeNodeDescription` (Production Management and
+    Deep Wells tooltips), `WorkSpeedHelper`, and `Patch_WellStart` all use the
+    same cache.
+  - Deep Wells tooltip now caches the tech ID on first call (like the Wax tooltip
+    already did) so subsequent calls skip the name lookup entirely.
+  - `GE_ManufacturingSourceItemModify.UpdateItemDef` prefix now caches the
+    `FieldInfo` objects for `itemName` and `manuDef` instead of going through
+    `HarmonyLib.Traverse` on every single wax-barrel update call.
+  - `Patch_VillagerCarryCapacity` exits immediately when the multiplier is 1.0
+    (no-op config), saving a float multiply per villager per capacity query.
+
+---
+
 ## [1.7.4] — 2026-05-04
 
 ### Added
