@@ -2,6 +2,15 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.7.4] — 2026-05-04
+
+### Added
+- **Deep Wells tooltip** — the tech description now shows the water capacity bonus
+  added per rank (and the total at max rank), in the player's UI language (15 languages).
+  Example at rank 5 with default config: `Well capacity: +250 (current) / +300 per rank (next rank)`.
+
+---
+
 ## [1.7.3] — 2026-05-04
 
 ### Changed
