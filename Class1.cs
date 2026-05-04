@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.1", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.7.2", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -35,7 +35,8 @@ namespace TechRankExpanderMod
             { "Alcohol Sterilization",           20 },
             { "Beautification",                  20 },
             { "Masonry",                          5 },  // -25% bricks per rank; at 4 ranks = -100% (free buildings)
-            { "Civic Inspections",                3 },  // -30% firefighter work per rank; rank 4 = -120% (negative work time → firefighters stop working)
+            // "Civic Inspections" hardcoded to 3 in code — NOT configurable.
+            // Each rank is -30% firefighter work time; rank 4 = -120% (negative) breaks firefighters.
             { "Military Logistics",               9 },  // -10% item work per rank; >9 makes crafting work negative
             { "Horse Armor",                     20 },
             { "Wheel-Lock Crossbow",             20 },
@@ -783,6 +784,11 @@ namespace TechRankExpanderMod
             RuntimeConfig.ActiveRanks.Clear();
             foreach (var kv in _rankEntries)
                 RuntimeConfig.ActiveRanks[kv.Key] = kv.Value.Value;
+
+            // Hard-coded caps — not exposed in config to prevent game-breaking bugs.
+            // Civic Inspections: -30% firefighter work per rank; rank 4+ = negative work time → firefighters stop.
+            RuntimeConfig.ActiveRanks["Civic Inspections"] = 3;
+
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;
             RuntimeConfig.WorkSpeedPerRank        = _workSpeedEntry.Value;

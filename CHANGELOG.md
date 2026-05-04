@@ -2,6 +2,17 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.7.2] — 2026-05-04
+
+### Changed
+- **Civic Inspections** removed from the config file entirely. The cap of 3 is now
+  hardcoded in code and cannot be changed by users. This prevents the rank 4+
+  bug (negative firefighter work time) from ever being triggered accidentally.
+  Any existing `Ranks_Civic_Inspections` line in a user's config file is silently
+  ignored.
+
+---
+
 ## [1.7.1] — 2026-05-04
 
 ### Fixed
