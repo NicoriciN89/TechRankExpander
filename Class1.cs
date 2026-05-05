@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.8.1", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.8.2", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -29,7 +29,8 @@ namespace TechRankExpanderMod
             { "Heat-Treated Halberds",           20 },
             { "Deep Mine Ventilation",           20 },
             { "Pharmaceutical Study",            20 },
-            { "Favored Nation",                  19 },  // -5% trade price per rank; rank 20 = -100% = zero export prices
+            // "Favored Nation" hardcoded to 9 in code — NOT configurable.
+            // Each rank is -10% sell price; rank 10 = -100% = zero gold from bazaar; rank 11+ = negative prices.
             { "Steel Tools",                     9 },  // -10% item work per rank; >9 makes crafting work negative
             { "Variolation",                     20 },
             { "Alcohol Sterilization",           20 },
@@ -903,6 +904,9 @@ namespace TechRankExpanderMod
             // Hygiene: each rank is -25% disease probability; rank 4 = -100% (fully eliminated).
             // Rank 5+ would produce negative probability values, breaking disease mechanics.
             RuntimeConfig.ActiveRanks["Hygiene"] = 4;
+            // Favored Nation: each rank is -10% trading-post sell price; rank 10 = -100% = zero gold from bazaar.
+            // Rank 11+ = negative prices (items have negative sell value), breaking trade entirely.
+            RuntimeConfig.ActiveRanks["Favored Nation"] = 9;
 
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;

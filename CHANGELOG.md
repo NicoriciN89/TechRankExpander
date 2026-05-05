@@ -2,6 +2,17 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.8.2] — 2026-05-05
+
+### Changed
+- **Favored Nation** capped at rank 9 and removed from the config file.
+  Each rank reduces trading-post sell prices by −10%; rank 10 = −100% (zero
+  gold from the bazaar); rank 11+ produces negative prices, breaking trade
+  entirely. Any existing `Ranks_Favored_Nation` line in the config is silently
+  ignored from this version onward.
+
+---
+
 ## [1.8.1] — 2026-05-04
 
 ### Changed
