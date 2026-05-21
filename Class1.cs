@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.8.2", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.9.0-beta", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -29,8 +29,7 @@ namespace TechRankExpanderMod
             { "Heat-Treated Halberds",           20 },
             { "Deep Mine Ventilation",           20 },
             { "Pharmaceutical Study",            20 },
-            // "Favored Nation" hardcoded to 9 in code — NOT configurable.
-            // Each rank is -10% sell price; rank 10 = -100% = zero gold from bazaar; rank 11+ = negative prices.
+            { "Favored Nation",                 1 },  // -10% sell price per rank; default 1 keeps trade safe.
             { "Steel Tools",                     9 },  // -10% item work per rank; >9 makes crafting work negative
             { "Variolation",                     20 },
             { "Alcohol Sterilization",           20 },
@@ -103,6 +102,7 @@ namespace TechRankExpanderMod
         internal static KeyCode KpHotkey = KeyCode.F8;
         internal static int KpHotkeyAmount = 1;
         internal static int MaxWaxPerBarrel = 2;
+        internal static float LivestockCapacityMultiplier = 2f;
     }
 
     // ── Tech lookup cache ──────────────────────────────────────────────────────────────────
@@ -123,6 +123,96 @@ namespace TechRankExpanderMod
                 ById[t.GetId()]        = t;
                 ByName[t.GetTechName()] = t;
             }
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // ── Patch: UISubWidgetLivestockControls — show mod max on herd-size slider ────────
+    // Appends "(mod max N)" to the slider counter text whenever the herd-size
+    // panel is opened or the slider value changes, so players can see the new cap.
+    [HarmonyPatch(typeof(UISubWidgetLivestockControls), "OnChangeHerdSize")]
+    internal static class Patch_UILivestock_OnChangeHerdSize
+    {
+        static void Postfix(UISubWidgetLivestockControls __instance) =>
+            LivestockSliderTextHelper.UpdateText(__instance);
+    }
+
+    [HarmonyPatch(typeof(UISubWidgetLivestockControls), "OnUserDefinedHerdSizeChanged")]
+    internal static class Patch_UILivestock_OnHerdSizeChanged
+    {
+        static void Postfix(UISubWidgetLivestockControls __instance) =>
+            LivestockSliderTextHelper.UpdateText(__instance);
+    }
+
+    internal static class LivestockSliderTextHelper
+    {
+        private static System.Reflection.FieldInfo _textField;
+        private static System.Reflection.FieldInfo _sliderField;
+
+        internal static void UpdateText(UISubWidgetLivestockControls inst)
+        {
+            if (RuntimeConfig.LivestockCapacityMultiplier <= 1f) return;
+
+            if (_textField == null)
+            {
+                var t = typeof(UISubWidgetLivestockControls);
+                _textField   = t.GetField("herdSizeText",   System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                _sliderField = t.GetField("herdSizeSlider", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            }
+            if (_textField == null || _sliderField == null) return;
+
+            var text   = _textField.GetValue(inst)   as TMPro.TextMeshProUGUI;
+            var slider = _sliderField.GetValue(inst) as UnityEngine.UI.Slider;
+            if (text == null || slider == null) return;
+
+            int cur = Mathf.RoundToInt(slider.value);
+            int max = Mathf.RoundToInt(slider.maxValue);
+            text.text = "x" + cur + " <size=75%><color=#F4D44D>(mod max " + max + ")</color></size>";
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // ── Patch: LivestockBuilding.Start — Livestock barn capacity ──────────────
+    // Multiplies numLivestockToBeOverpopulated on each unique LivestockHerdSetupData
+    // ScriptableObject so that the UI slider max and the save-load clamp both use
+    // the increased ceiling.  Tracked via HashSet<int> by SO instanceID so shared
+    // ScriptableObjects (multiple barns of the same type) are only modified once.
+    // If a building's userDefinedMaxLivestock was at the vanilla maximum it is
+    // automatically raised to the new maximum so existing saves benefit immediately.
+    [HarmonyPatch(typeof(LivestockBuilding), "Start")]
+    internal static class Patch_LivestockBuilding_Start
+    {
+        // Cleared on every scene load so a fresh map always re-applies the multiplier.
+        private static readonly System.Collections.Generic.HashSet<int> _patchedSOs =
+            new System.Collections.Generic.HashSet<int>();
+
+        internal static void ClearCache() => _patchedSOs.Clear();
+
+        static void Postfix(LivestockBuilding __instance)
+        {
+            float mult = RuntimeConfig.LivestockCapacityMultiplier;
+            if (mult <= 1f) return;
+
+            var sd = __instance.herdSetupData;
+            if (sd == null) return;
+
+            int soId = sd.GetInstanceID();
+            int oldOver = sd.numLivestockToBeOverpopulated;
+
+            if (!_patchedSOs.Contains(soId))
+            {
+                _patchedSOs.Add(soId);
+                int newOver = Mathf.RoundToInt(oldOver * mult);
+                if (newOver <= oldOver) return;   // multiplier rounds down to same value
+                sd.numLivestockToBeOverpopulated = newOver;
+                MelonLogger.Msg($"[TechRankExpander] {sd.name}: numLivestockToBeOverpopulated "
+                    + $"{oldOver} -> {newOver} ({mult}x)");
+            }
+
+            // If this building's capacity was at the old vanilla max, raise it to the new max.
+            int oldVanillaMax = oldOver - 1;
+            if (__instance.userDefinedMaxLivestock == oldVanillaMax)
+                __instance.userDefinedMaxLivestock = sd.numLivestockToBeOverpopulated - 1;
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -551,8 +641,6 @@ namespace TechRankExpanderMod
                     + $"(remaining: {__instance.knowledgePoints}).");
                 TechResetHelper.AccumulatedKpCost = 0;
 
-                RuntimeConfig.AllotAllTechs = false;
-                TechRankExpander.Instance?.ClearAllotFlag();
                 __instance.UpdatePrereqNodes(true);
                 TechBuildingHelper.ActivateTechBuildings();
             }
@@ -796,6 +884,7 @@ namespace TechRankExpanderMod
         private MelonPreferences_Entry<string>  _kpHotkeyEntry;
         private MelonPreferences_Entry<int>     _kpHotkeyAmountEntry;
         private MelonPreferences_Entry<int>     _maxWaxEntry;
+        private MelonPreferences_Entry<float>   _livestockCapEntry;
         private readonly Dictionary<string, MelonPreferences_Entry<int>> _rankEntries =
             new Dictionary<string, MelonPreferences_Entry<int>>();
 
@@ -834,8 +923,8 @@ namespace TechRankExpanderMod
                 "Allot_All_Techs", false,
                 display_name: "Allot All Techs",
                 description: "Set to true to instantly fill ALL tech ranks to their configured caps on the next map load (spends KP). "
-                           + "The flag is automatically cleared after applying. "
-                           + "/ Установите true, чтобы при следующей загрузке карты все ранги технологий были выкуплены до максимума (тратит ОЗ). Флаг очищается автоматически.");
+                           + "The setting stays enabled until you turn it off manually. "
+                           + "/ Установите true, чтобы при следующей загрузке карты все ранги технологий были выкуплены до максимума (тратит ОЗ). Настройка остаётся включённой, пока вы не выключите её вручную.");
 
             _deepWellsWaterEntry = _cat.CreateEntry(
                 "Deep_Wells_Water_Volume_Per_Rank", 50,
@@ -868,6 +957,17 @@ namespace TechRankExpanderMod
                            + "1 = always 1 wax, 2 = capped at vanilla rank-1 value (default), 0 = removes wax from recipe entirely. "
                            + "/ Максимум воска (ItemWax) на производство одной бочки. "
                            + "1 = всегда 1 воск, 2 = не выше первого ранга ванили (по умолчанию), 0 = убрать воск из рецепта.");
+
+            _livestockCapEntry = _cat.CreateEntry(
+                "Livestock_Capacity_Multiplier", 2f,
+                display_name: "Livestock Barn Capacity Multiplier [BETA]",
+                description: "Multiplier on the maximum number of animals in every barn type "
+                           + "(Barn, Stable, GoatBarn, ChickenCoop, Kennel). "
+                           + "2 = double capacity (e.g. Barn 7 -> 14), 1 = vanilla. "
+                           + "Change takes effect on next map load. "
+                           + "/ Множитель максимального числа животных во всех типах построек "
+                           + "(Амбар, Конюшня, Козлятник, Курятник, Псарня). "
+                           + "2 = двойная вместимость, 1 = ваниль. Вступает в силу при следующей загрузке карты.");
 
             foreach (var kv in TechDefaults.DefaultRanks)
             {
@@ -906,7 +1006,10 @@ namespace TechRankExpanderMod
             RuntimeConfig.ActiveRanks["Hygiene"] = 4;
             // Favored Nation: each rank is -10% trading-post sell price; rank 10 = -100% = zero gold from bazaar.
             // Rank 11+ = negative prices (items have negative sell value), breaking trade entirely.
-            RuntimeConfig.ActiveRanks["Favored Nation"] = 9;
+            if (_rankEntries.TryGetValue("Favored Nation", out var favoredNationEntry))
+                RuntimeConfig.ActiveRanks["Favored Nation"] = Mathf.Clamp(favoredNationEntry.Value, 1, 9);
+            else
+                RuntimeConfig.ActiveRanks["Favored Nation"] = 1;
 
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;
@@ -924,6 +1027,7 @@ namespace TechRankExpanderMod
             }
             RuntimeConfig.KpHotkeyAmount = Mathf.Max(1, _kpHotkeyAmountEntry.Value);
             RuntimeConfig.MaxWaxPerBarrel = Mathf.Max(0, _maxWaxEntry.Value);
+            RuntimeConfig.LivestockCapacityMultiplier = Mathf.Max(1f, _livestockCapEntry?.Value ?? 2f);
         }
 
         // Called from Patch_TechTreeManager_Load after the reset completes,
@@ -949,6 +1053,7 @@ namespace TechRankExpanderMod
         {
             if (sceneName != "Map") return;
             WorkSpeedHelper.Reset();
+            Patch_LivestockBuilding_Start.ClearCache();
             RefreshRuntimeConfig();
         }
 

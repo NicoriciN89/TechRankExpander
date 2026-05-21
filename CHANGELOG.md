@@ -2,6 +2,18 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.9.0-beta] — 2026-05-21
+
+### Changed
+- **Favored Nation** is configurable again with a safe cap of 9 and a default
+  cap of 1. The mod clamps the value to the safe range so trade pricing cannot
+  go negative by accident.
+- **Allot All Techs** no longer clears itself after the first load. It remains
+  enabled until you turn it off manually in the config.
+- Updated the release packaging and NexusMods description for the current build.
+
+---
+
 ## [1.8.2] — 2026-05-05
 
 ### Changed

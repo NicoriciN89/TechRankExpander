@@ -34,7 +34,8 @@ A [MelonLoader](https://melonloader.com/) mod for **Farthest Frontier v1.1.0** t
 | **Deep Wells water volume** — each Deep Wells rank adds bonus capacity to wells | +50 / rank |
 | **Deep Wells tooltip** — shows current / next water bonus in the tech description (15 languages) | — |
 | **Reset Tech Tree** — refund all researched ranks back to KP on next load (one-shot flag) | off |
-| **Allot All Techs** — fill every tech to its configured cap in one click (one-shot flag) | off |
+| **Allot All Techs** — fill every tech to its configured cap on each load until disabled | off |
+| **Favored Nation** — configurable safe cap for bazaar sell price reduction | 1 |
 | **15 UI languages** for mod tooltips (Production Management, Deep Wells) | auto |
 
 ---
@@ -50,14 +51,14 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 | Civic Inspections | 3 | −30 % firefighter work time | −90 % |
 | Sheet Composting | 3 | −30 % compost work time | −90 % |
 | Hygiene | 4 | −25 % disease probability | −100 % |
-| Favored Nation | 9 | −10 % bazaar sell price | −90 % |
 
-> These caps cannot be raised via config. Rank 4+ for Civic Inspections / Sheet Composting gives negative work time (workers stop). Rank 5+ for Hygiene gives negative disease probability. Rank 10+ for Favored Nation gives zero or negative sell prices.
+> These caps cannot be raised via config. Rank 4+ for Civic Inspections / Sheet Composting gives negative work time (workers stop). Rank 5+ for Hygiene gives negative disease probability.
 
 ### Configurable caps (can be lowered or raised in config)
 
 | Technology | Default cap | Effect per rank |
 |:-----------|:-----------:|:----------------|
+| Favored Nation | 1 | −10 % bazaar sell price |
 | Steel Tools | 9 | −10 % crafting time |
 | Military Logistics | 9 | −10 % crafting time |
 | Spring Pole Lathe | 4 | −20 % crafting time |
@@ -69,7 +70,7 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 | Sustainable Farming | 3 | −25 % fertility loss |
 | Printing Press | 1 | −50 % crafting time |
 
-> You can lower any configurable cap. Raising above these values may cause unintended results the game cannot recover from.
+> You can lower any configurable cap. Favored Nation is clamped to a safe maximum of 9; other caps above their safe range may cause unintended results the game cannot recover from.
 
 ---
 
@@ -96,23 +97,24 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 Edit `UserData\TechRankExpander.cfg` with any text editor. Changes take effect on the **next map load** — no restart needed.
 
 ```ini
-KP_Speed_Multiplier           = 5.0    # KP generation speed (1 = vanilla)
-Carry_Capacity_Multiplier     = 3.0    # villager carry weight (1 = vanilla)
-Work_Speed_Per_Rank           = 0.01   # +1 % work speed per Production Management rank
-Deep_Wells_Water_Volume_Per_Rank = 50  # bonus well capacity per Deep Wells rank (0 = off)
-Reset_Tech_Tree               = false  # set true once to refund all ranks to KP
-Allot_All_Techs               = false  # set true once to fill all techs to cap
-KP_Hotkey                     = F8     # key to add KP instantly (UnityEngine.KeyCode name)
-KP_Hotkey_Amount              = 1      # KP added per key press
+KP_Speed_Multiplier              = 5.0   # KP generation speed (1 = vanilla)
+Carry_Capacity_Multiplier        = 3.0   # villager carry weight (1 = vanilla)
+Work_Speed_Per_Rank              = 0.01  # +1 % work speed per Production Management rank
+Deep_Wells_Water_Volume_Per_Rank = 50    # bonus well capacity per Deep Wells rank (0 = off)
+Reset_Tech_Tree                  = false # set true once to refund all ranks to KP
+Allot_All_Techs                  = false # set true to fill all techs to cap on each load until disabled
+KP_Hotkey                        = F8     # key to add KP instantly (UnityEngine.KeyCode name)
+KP_Hotkey_Amount                 = 1      # KP added per key press
 
 # Per-tech rank caps — one entry per technology:
+Ranks_Favored_Nation          = 1
 Ranks_Steel_Tools             = 9
 Ranks_Military_Logistics      = 9
 Ranks_Masonry                 = 5
 Ranks_Printing_Press          = 1
 # ... one line per tech (~67 total)
-# Note: Civic Inspections, Sheet Composting, Hygiene, Favored Nation
-# are hardcoded and do NOT appear in the config.
+# Note: Civic Inspections, Sheet Composting, and Hygiene are hardcoded
+# and do NOT appear in the config.
 ```
 
 Valid `KP_Hotkey` values are [UnityEngine.KeyCode](https://docs.unity3d.com/ScriptReference/KeyCode.html) names, e.g. `F7`, `F9`, `Alpha1`, `Keypad0`.
