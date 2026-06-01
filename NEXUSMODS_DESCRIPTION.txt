@@ -1,5 +1,5 @@
 ================================================================
-  TechRankExpander  v1.9.0-beta
+  TechRankExpander  v1.9.2
   Author : Modder
   Game   : Farthest Frontier v1.1.0 (Mono / MelonLoader)
 ================================================================
@@ -43,16 +43,34 @@ TechRankExpander expands the tech tree beyond the vanilla rank limits and gives 
 [/list]
 
 [size=4][b]Safe caps[/b][/size]
-Some technologies use percentage-based effects that break if their rank cap is raised too far. TechRankExpander enforces safe limits to avoid negative values and broken game logic.
+Some technologies use percentage-based effects that break if their rank cap is raised too far. TechRankExpander enforces safe limits automatically to protect game logic.
 
+[b]Hardcoded (not configurable):[/b]
 [list]
-[*]Civic Inspections — cap 3
-[*]Sheet Composting — cap 3
-[*]Hygiene — cap 4
-[*]Favored Nation — default 1, safe max 9
+[*][b]Civic Inspections[/b] — cap 3 (rank 4+ gives negative firefighter work time → workers freeze)
+[*][b]Sheet Composting[/b] — cap 3 (rank 4+ gives negative compost work time → Compost Yard breaks)
+[*][b]Hygiene[/b] — cap 4 (game uses Clamp01 internally; rank 5+ is redundant)
 [/list]
 
-Other tech caps, such as Steel Tools, Military Logistics, Masonry, Printing Press, and similar entries, remain configurable, but values above the safe range may cause unintended results.
+[b]Configurable with runtime clamp:[/b]
+[list]
+[*][b]Favored Nation[/b] — default 1, hard max 9 (rank 10 = 0 gold from bazaar; rank 11+ = negative prices)
+[*][b]Sustainable Farming[/b] — default 4, hard max 4 (rank 5+ reverses fertility loss → farms restore fertility indefinitely)
+[/list]
+
+[b]Configurable (no hard clamp, safe by default):[/b]
+[list]
+[*]Steel Tools, Military Logistics, Production Logistics, Metallurgy — cap 9 (−10%/rank; rank 10 = instant craft)
+[*]Venting Chambers — cap 6 (−15%/rank; rank 7 = instant craft)
+[*]Spring Pole Lathe, Stiff-Blade Saw, Stonecutting — cap 4 (−20%/rank; rank 5 = instant)
+[*]Adjustable Shoe Lasts — cap 3 (−25%/rank; rank 4 = instant craft)
+[*]Masonry — cap 15 (compound −25% of current bricks per rank; stabilises at 1–2 bricks)
+[*]Printing Press — cap 1 (−50%/rank; rank 2 = instant craft)
+[/list]
+
+[b]Note on Masonry:[/b] the game applies a [i]compound[/i] reduction (each rank reduces the current brick count by 25%, not the original). This was previously documented incorrectly as linear. Cap raised from 5 to 15.
+
+[b]Work-time caps (Steel Tools etc.):[/b] the game internally clamps work units to 0 minimum — they do not go negative. Caps are set to prevent instant (0-time) production, not to prevent negative values.
 
 [size=4][b]Configuration[/b][/size]
 After the first game launch, edit:
@@ -69,9 +87,11 @@ Allot_All_Techs = false
 KP_Hotkey = F8
 KP_Hotkey_Amount = 1
 
-Ranks_Favored_Nation = 1
+Ranks_Favored_Nation = 1       # hard clamped to max 9 in code
+Ranks_Sustainable_Farming = 4  # hard clamped to max 4 in code
 Ranks_Steel_Tools = 9
-Ranks_Masonry = 5
+Ranks_Masonry = 15             # compound reduction — safe up to ~20
+Ranks_Stonecutting = 4
 [/code]
 
 [b]Allot_All_Techs[/b] fills each tech to its configured cap on every load until you turn it off manually. [b]Reset_Tech_Tree[/b] still works as a one-time load option.
@@ -102,18 +122,41 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   FILE TO UPLOAD ON NEXUSMODS
 ================================================================
-  TechRankExpander_v1.9.0-beta.zip
+  TechRankExpander_v1.9.2.zip
 
   ZIP structure (drop-into-game-folder install):
     Mods/TechRankExpander.dll
-    UserData/TechRankExpander.cfg
+
+================================================================
+  NEXUSMODS CHANGELOG (paste into the "Change log" field)
+================================================================
+v1.9.2 — Bug fixes & protection mechanism
+
+Fixed wrong caps (found by decompiling Assembly-CSharp.dll):
+• Masonry cap raised 5 → 15: reduction is COMPOUND (−25% of current bricks per
+  rank, not original). Previous cap was based on incorrect linear assumption.
+• Stonecutting cap lowered 5 → 4: rank 5 = instant mining (0 work units). Cap
+  at 4 keeps at least 20% work time.
+• Sustainable Farming default raised 3 → 4, hard runtime clamp at max 4.
+  Rank 4 = 0% fertility loss (safe). Rank 5+ = farms restore fertility (broken).
+• All work-time comments corrected: game clamps to 0 (instant), not negative.
+
+Protection mechanism added:
+• Runtime guard on HappinessManager.GetWorkRateMultiplier(Villager) ensures
+  occupation work rates never go negative (workers can never freeze due to
+  misconfigured tech bonuses).
+• Runtime clamp for Sustainable Farming with a logged warning.
+
+v1.9.1 — Bug fixes
+• Livestock barn capacity no longer compounds on repeated map reloads.
+• KP refund/cost counters now reset at load start, not just load end.
 
 ================================================================
   NEXUSMODS PAGE SETTINGS
 ================================================================
   Category  : Gameplay
   Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
-  Version   : 1.9.0-beta
+  Version   : 1.9.2
   Game ver. : 1.1.0
   Requires  : MelonLoader
 ================================================================
