@@ -4,19 +4,41 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.9.0-beta", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.9.2", "Modder")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
 {
     internal static class TechDefaults
     {
+        // ── Cap rationale ──────────────────────────────────────────────────────
+        // Work-time techs (GE_ManufacturingWorkModify): each rank subtracts from
+        // workUnitModifier (starts at 1.0). The game uses Mathf.Max(0, CeilToInt(...))
+        // so work units are clamped to 0 — NOT negative. Zero means instant production.
+        // Caps are set so the modifier stays > 0 (some work time remains).
+        //
+        // Brick-cost tech (GE_BuildingMaterialsQtyModify / Masonry): COMPOUND reduction —
+        // each rank cuts the *current* qty by 25%, not the original. Formula is clamped
+        // to 0 by the game. Cap 15 is safe; the curve stabilises at 1–2 bricks before
+        // that point. Previous cap of 5 was based on an incorrect linear assumption.
+        //
+        // Fertility tech (Sustainable Farming): depletionAmount *= (1 + total). NOT
+        // clamped by the game. Rank 4 = multiplier 0.0 → no fertility loss (safe).
+        // Rank 5+ = negative multiplier → fertility restores (infinite fertility).
+        // Clamped to max 4 in RefreshRuntimeConfig.
+        //
+        // Occupation work-rate (GE_OccupationWorkRate): final = happinessCurve + bonus,
+        // NO game-side clamp. Negative bonus → workers freeze. Civic Inspections and
+        // Sheet Composting use negative modifiers and are hardcoded to 3 below.
+        // Runtime guard Patch_GetWorkRateMultiplier_Clamp enforces min 0.01 on every
+        // GetWorkRateMultiplier(Villager) call as a belt-and-suspenders safety net.
+        // ──────────────────────────────────────────────────────────────────────
         internal static readonly Dictionary<string, int> DefaultRanks = new Dictionary<string, int>
         {
             { "Vermicast",                       20 },
             { "Command Structure",               20 },
             { "Iron Shares",                     20 },
-            { "Sustainable Farming",             3 },  // -25% fertility loss per rank; >3 reverses fertility loss (infinite fertility)
+            { "Sustainable Farming",              4 },  // compound −25% fertility loss/rank; rank 4 = 0% loss (safe); rank 5+ = fertility restored → clamped to 4
             { "Taxation",                        20 },
             { "Production Management",           20 },
             { "Marksman Training",               20 },
@@ -29,29 +51,29 @@ namespace TechRankExpanderMod
             { "Heat-Treated Halberds",           20 },
             { "Deep Mine Ventilation",           20 },
             { "Pharmaceutical Study",            20 },
-            { "Favored Nation",                 1 },  // -10% sell price per rank; default 1 keeps trade safe.
-            { "Steel Tools",                     9 },  // -10% item work per rank; >9 makes crafting work negative
+            { "Favored Nation",                   1 },  // −10% sell price/rank; rank 10 = 0 gold; rank 11+ = negative prices → clamped to max 9
+            { "Steel Tools",                      9 },  // −10% work/rank; rank 10 = instant (game clamps to 0); cap keeps ≥10% work time
             { "Variolation",                     20 },
             { "Alcohol Sterilization",           20 },
             { "Beautification",                  20 },
-            { "Masonry",                          5 },  // -25% bricks per rank; at 4 ranks = -100% (free buildings)
-            // "Civic Inspections" hardcoded to 3 in code — NOT configurable.
-            // Each rank is -30% firefighter work time; rank 4 = -120% (negative) breaks firefighters.
-            { "Military Logistics",               9 },  // -10% item work per rank; >9 makes crafting work negative
+            { "Masonry",                         15 },  // compound −25% bricks/rank (reduces current qty, not original); stabilises at 1–2 bricks; game clamps to 0
+            // "Civic Inspections" hardcoded to 3 — NOT configurable.
+            // GE_OccupationWorkRate (negative modifier); rank 4+ → negative work rate → firefighters freeze.
+            { "Military Logistics",               9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
             { "Horse Armor",                     20 },
             { "Wheel-Lock Crossbow",             20 },
             { "Scientific Discovery",            20 },
-            { "Printing Press",                  1 },  // -50% item work per rank; rank 2 = -100% = zero work
+            { "Printing Press",                   1 },  // −50% work/rank; rank 2 = instant; cap keeps 50% work time
             { "Advanced Metal-Casting",          20 },
             { "Fire Assaying",                   20 },
-            { "Spring Pole Lathe",                4 },  // -20% item work per rank; >4 makes crafting work zero/negative
+            { "Spring Pole Lathe",                4 },  // −20% work/rank; rank 5 = instant; cap keeps ≥20% work time
             { "Sustainable Forestry",            20 },
             { "Treadwheel Crane",                20 },
             { "Iron-Rimmed Wheels",              20 },
             { "Selective Breeding: Grains",      20 },
             { "Selective Breeding: Non-Grain",   20 },
             { "Steel Surgical Tools",            20 },
-            { "Metallurgy",                       9 },  // -10% item work per rank; >9 makes crafting work zero/negative
+            { "Metallurgy",                       9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
             { "Drought Tolerance",               20 },
             { "Midwives",                        20 },
             { "Ratting Dogs",                    20 },
@@ -62,11 +84,11 @@ namespace TechRankExpanderMod
             { "Tower Shields",                   20 },
             { "Scientific Method",               20 },
             { "Cast-Iron Axe Blades",            20 },
-            { "Adjustable Shoe Lasts",            3 },  // -25% item work per rank; >3 makes crafting work zero/negative
-            { "Production Logistics",             9 },  // -10% item work per rank; >9 makes crafting work negative
+            { "Adjustable Shoe Lasts",            3 },  // −25% work/rank; rank 4 = instant; cap keeps ≥25% work time
+            { "Production Logistics",             9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
             { "Spindlewick Production",          20 },
             { "Wax-Sealed Barrels",              20 },
-            { "Stiff-Blade Saw",                  4 },  // -20% item work per rank; >4 makes crafting work zero/negative
+            { "Stiff-Blade Saw",                  4 },  // −20% work/rank; rank 5 = instant; cap keeps ≥20% work time
             { "Heavy Freight Wagons",            20 },
             { "Foothold Traps",                  20 },
             { "Double-Walled Hives",             20 },
@@ -74,7 +96,8 @@ namespace TechRankExpanderMod
             { "Artificial Selection",            20 },
             { "Mortar-Reinforced Palisades",     20 },
             { "Trailblazing",                    20 },
-            // Hygiene capped at 4 in code — not configurable (rank 5+ breaks disease probability)
+            // Hygiene capped at 4 in code — not configurable.
+            // GE_DiseaseChanceAndSpreadModify uses Clamp01 internally; rank 5+ is safe but redundant.
             // { "Hygiene",                         20 },
             { "Spotters",                        20 },
             { "Defensive Barricades",            20 },
@@ -82,11 +105,11 @@ namespace TechRankExpanderMod
             { "Natural Philosophy",              20 },
             { "Dendrology",                      20 },
             { "Sustainable Fishing",             20 },
-            { "Venting Chambers",                6 },  // -15% item work per rank; >6 makes crafting work negative
-            { "Stonecutting",                     5 },  // -20% per rank; >5 makes mining time negative
+            { "Venting Chambers",                 6 },  // −15% work/rank; rank 7 = instant; cap keeps ≥10% work time
+            { "Stonecutting",                     4 },  // −20% work/rank; rank 5 = instant; cap keeps ≥20% work time
             { "Woodlore",                        20 },
-            // "Sheet Composting" hardcoded to 3 in code — NOT configurable.
-            // Each rank is -30% compost work time; rank 4 = -120% (negative) breaks the Compost Yard.
+            // "Sheet Composting" hardcoded to 3 — NOT configurable.
+            // GE_OccupationWorkRate (negative modifier); rank 4+ → negative work rate → Compost Yard breaks.
         };
     }
 
@@ -182,9 +205,15 @@ namespace TechRankExpanderMod
     [HarmonyPatch(typeof(LivestockBuilding), "Start")]
     internal static class Patch_LivestockBuilding_Start
     {
-        // Cleared on every scene load so a fresh map always re-applies the multiplier.
+        // Cleared on every scene load so the log fires once per SO per load.
         private static readonly System.Collections.Generic.HashSet<int> _patchedSOs =
             new System.Collections.Generic.HashSet<int>();
+
+        // Never cleared — stores the unmodified vanilla value for each SO.
+        // ScriptableObjects persist in memory across scene reloads; without this,
+        // the multiplier would compound each reload (8 → 16 → 32 → …).
+        private static readonly Dictionary<int, int> _originalValues =
+            new Dictionary<int, int>();
 
         internal static void ClearCache() => _patchedSOs.Clear();
 
@@ -197,22 +226,31 @@ namespace TechRankExpanderMod
             if (sd == null) return;
 
             int soId = sd.GetInstanceID();
-            int oldOver = sd.numLivestockToBeOverpopulated;
+
+            // Record the vanilla value the first time we see this SO (survives reloads).
+            if (!_originalValues.TryGetValue(soId, out int vanillaOver))
+            {
+                vanillaOver = sd.numLivestockToBeOverpopulated;
+                _originalValues[soId] = vanillaOver;
+            }
+
+            int newOver = Mathf.RoundToInt(vanillaOver * mult);
+            if (newOver <= vanillaOver) return; // multiplier rounds down to same value
 
             if (!_patchedSOs.Contains(soId))
             {
                 _patchedSOs.Add(soId);
-                int newOver = Mathf.RoundToInt(oldOver * mult);
-                if (newOver <= oldOver) return;   // multiplier rounds down to same value
-                sd.numLivestockToBeOverpopulated = newOver;
-                MelonLogger.Msg($"[TechRankExpander] {sd.name}: numLivestockToBeOverpopulated "
-                    + $"{oldOver} -> {newOver} ({mult}x)");
+                if (sd.numLivestockToBeOverpopulated != newOver)
+                {
+                    sd.numLivestockToBeOverpopulated = newOver;
+                    MelonLogger.Msg($"[TechRankExpander] {sd.name}: numLivestockToBeOverpopulated "
+                        + $"{vanillaOver} -> {newOver} ({mult}x)");
+                }
             }
 
-            // If this building's capacity was at the old vanilla max, raise it to the new max.
-            int oldVanillaMax = oldOver - 1;
-            if (__instance.userDefinedMaxLivestock == oldVanillaMax)
-                __instance.userDefinedMaxLivestock = sd.numLivestockToBeOverpopulated - 1;
+            // If this building's capacity was at the vanilla maximum, raise it to the new maximum.
+            if (__instance.userDefinedMaxLivestock == vanillaOver - 1)
+                __instance.userDefinedMaxLivestock = newOver - 1;
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -611,7 +649,14 @@ namespace TechRankExpanderMod
     [HarmonyPatch(typeof(TechTreeManager), "Load", new System.Type[] { typeof(ES2Reader) })]
     internal static class Patch_TechTreeManager_Load
     {
-        static void Prefix() { TechResetHelper.InTechManagerLoad = true; }
+        static void Prefix()
+        {
+            // Reset accumulated values at load start so a previously interrupted load
+            // (exception before Postfix ran) cannot corrupt the next load's KP math.
+            TechResetHelper.InTechManagerLoad = true;
+            TechResetHelper.AccumulatedKpRefund = 0;
+            TechResetHelper.AccumulatedKpCost = 0;
+        }
 
         static void Postfix(TechTreeManager __instance)
         {
@@ -644,6 +689,27 @@ namespace TechRankExpanderMod
                 __instance.UpdatePrereqNodes(true);
                 TechBuildingHelper.ActivateTechBuildings();
             }
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // ── Guard: HappinessManager.GetWorkRateMultiplier(Villager) ──────────────
+    // GE_OccupationWorkRate stores occupation bonuses in occupationToWorkRateChanges.
+    // The per-villager formula is:  result = happinessCurve(happiness) + techBonus
+    // The happiness part is already clamped to >= 0 inside GetWorkRateMultiplier(float),
+    // but the final addition of techBonus has NO game-side clamp.
+    // A large negative techBonus (e.g. Civic Inspections rank 4+, or any future tech
+    // that applies a negative GE_OccupationWorkRate at high ranks) makes the total
+    // negative — workers move in reverse or freeze entirely.
+    // This Postfix clamps the returned rate to a minimum of 0.01 (1% speed) so the
+    // game never receives a zero or negative work-rate regardless of configuration.
+    [HarmonyPatch(typeof(HappinessManager), "GetWorkRateMultiplier", new System.Type[] { typeof(Villager) })]
+    internal static class Patch_GetWorkRateMultiplier_Clamp
+    {
+        static void Postfix(ref float __result)
+        {
+            if (__result < 0.01f)
+                __result = 0.01f;
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -1010,6 +1076,18 @@ namespace TechRankExpanderMod
                 RuntimeConfig.ActiveRanks["Favored Nation"] = Mathf.Clamp(favoredNationEntry.Value, 1, 9);
             else
                 RuntimeConfig.ActiveRanks["Favored Nation"] = 1;
+            // Sustainable Farming: compound -25% fertility loss per rank.
+            // Rank 4 = 0% loss (farms never deplete — sustainable but not generative).
+            // Rank 5+ = negative multiplier → fertility RESTORES over time (infinite fertility, broken).
+            if (_rankEntries.TryGetValue("Sustainable Farming", out var sfEntry))
+            {
+                int sfClamped = Mathf.Clamp(sfEntry.Value, 1, 4);
+                if (sfClamped != sfEntry.Value)
+                    MelonLogger.Warning($"[TechRankExpander] Sustainable Farming rank clamped {sfEntry.Value} → {sfClamped} (rank 5+ reverses fertility loss).");
+                RuntimeConfig.ActiveRanks["Sustainable Farming"] = sfClamped;
+            }
+            else
+                RuntimeConfig.ActiveRanks["Sustainable Farming"] = 4;
 
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;

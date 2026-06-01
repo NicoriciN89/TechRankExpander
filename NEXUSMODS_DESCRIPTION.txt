@@ -17,26 +17,26 @@ Includes safe limits for techs that would otherwise break game balance.
 DESCRIPTION  (paste into the NexusMods "Description" BBCode tab)
 ─────────────────────────────────────────────────────────────────
 [center][size=5][b]TechRankExpander[/b][/size]
-[i]Extended tech ranks and configurable progression for Farthest Frontier[/i][/center]
+[i]Expanded tech ranks and configurable progression for Farthest Frontier[/i][/center]
 
 [size=4][b]Overview[/b][/size]
-TechRankExpander expands the tech tree beyond the vanilla rank limits and makes the game's progression systems more configurable.
+TechRankExpander expands the tech tree beyond the vanilla rank limits and gives you more control over the game's progression systems.
 
 [list]
 [*]Most technologies can be researched up to [b]20 ranks[/b] instead of the vanilla 1–3.
 [*]Knowledge Point generation can be sped up with a configurable multiplier.
-[*]Villager carry capacity and Production Management work speed bonuses are configurable.
-[*]Prerequisites unlock at rank 1 instead of requiring full completion.
-[*]Buildings tied to techs unlock at rank 1.
-[*]Deep Wells gains a configurable bonus water volume per rank, with tooltip support in multiple UI languages.
-[*]Reset Tech Tree and Allot All Techs are available as load-time options.
+[*]Villager carry capacity and the Production Management work-speed bonus are configurable.
+[*]Prerequisites unlock at rank 1 instead of requiring full research.
+[*]Tech-linked buildings unlock at rank 1.
+[*]Deep Wells gains a configurable water bonus per rank, with tooltip support in multiple UI languages.
+[*]Reset Tech Tree and Allot All Techs can be applied on load.
 [/list]
 
 [size=4][b]Default settings[/b][/size]
 [list]
 [*]KP speed multiplier: [b]5x[/b]
 [*]Carry capacity multiplier: [b]3x[/b]
-[*]Work speed bonus: [b]+1% per Production Management rank[/b]
+[*]Work-speed bonus: [b]+1% per Production Management rank[/b]
 [*]Deep Wells water volume per rank: [b]+50[/b]
 [*]Reset Tech Tree: [b]off[/b]
 [*]Allot All Techs: [b]off[/b]
@@ -49,10 +49,10 @@ Some technologies use percentage-based effects that break if their rank cap is r
 [*]Civic Inspections — cap 3
 [*]Sheet Composting — cap 3
 [*]Hygiene — cap 4
-[*]Favored Nation — cap 9
+[*]Favored Nation — default 1, safe max 9
 [/list]
 
-Other tech caps such as Steel Tools, Military Logistics, Masonry, Printing Press, and similar entries remain configurable, but values above the safe range may cause unintended results.
+Other tech caps, such as Steel Tools, Military Logistics, Masonry, Printing Press, and similar entries, remain configurable, but values above the safe range may cause unintended results.
 
 [size=4][b]Configuration[/b][/size]
 After the first game launch, edit:
@@ -74,7 +74,7 @@ Ranks_Steel_Tools = 9
 Ranks_Masonry = 5
 [/code]
 
-[b]Allot_All_Techs[/b] stays enabled until you turn it off manually. [b]Reset_Tech_Tree[/b] still works as a one-time load option.
+[b]Allot_All_Techs[/b] fills each tech to its configured cap on every load until you turn it off manually. [b]Reset_Tech_Tree[/b] still works as a one-time load option.
 
 [size=4][b]Requirements[/b][/size]
 [list]

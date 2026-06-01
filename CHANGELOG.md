@@ -2,6 +2,73 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.9.2] — 2026-06-01
+
+### Fixed — wrong caps (found by decompiling Assembly-CSharp.dll)
+
+- **Masonry cap raised from 5 → 15.**
+  Previous cap was based on an incorrect assumption that `GE_BuildingMaterialsQtyModify`
+  applies a *linear* −25 % per rank. Decompiled code reveals it is *compound* — each
+  rank reduces the *current* brick quantity by 25 %, not the original. The formula also
+  clamps to 0 min, so no rank can produce negative brick costs. At rank 15 brick
+  requirements stabilise at 1–2 per building. Players who already purchased rank 5 will
+  see their extra 10 ranks unlocked on next load (no KP refund needed).
+
+- **Stonecutting cap lowered from 5 → 4.**
+  At rank 5, `workUnitModifier = 1 − 5 × 0.20 = 0`. The game clamps via
+  `Mathf.Max(0, CeilToInt(…))` so work units become exactly 0 (instant mining), not
+  negative. Zero work time can overwhelm the task queue with back-to-back instant jobs.
+  Cap at 4 leaves 20 % work time (a noticeable reduction without being instant).
+
+- **Sustainable Farming default raised from 3 → 4 with a hard runtime clamp.**
+  `GE_GenericGameEffect fertilityLossFromCropPlantings` uses
+  `depletionAmount *= (1 + effectProportionTotal)`. The game does NOT clamp this.
+  Rank 4 → multiplier = 0.0 → no fertility depletion (farms sustainable forever, safe).
+  Rank 5+ → negative multiplier → fertility *restores* over time (infinite fertility,
+  farming challenge disappears). A runtime clamp in `RefreshRuntimeConfig` now enforces
+  max 4 and logs a warning if a higher value is detected in the config file.
+
+- **All work-time cap comments corrected.**
+  Previous comments said "makes crafting work *negative*". Decompiled code shows the
+  game uses `Mathf.Max(0, …)`, so the true behaviour is "makes crafting *instant*
+  (0 work units)". Caps are intentionally set one rank below the instant threshold so
+  workers always have some non-zero work time remaining.
+
+### Added — runtime protection mechanism
+
+- **`Patch_GetWorkRateMultiplier_Clamp`** — new Harmony Postfix on
+  `HappinessManager.GetWorkRateMultiplier(Villager)`.
+  The per-villager work-rate formula is `happinessCurve + techBonus` with **no
+  game-side clamp** on the total. A sufficiently negative `techBonus` (e.g.
+  Civic Inspections rank 4+, or any future modded tech using
+  `GE_OccupationWorkRate` with a large negative modifier) produces a negative
+  work rate — workers freeze or behave erratically. This patch clamps the
+  return value to a minimum of **0.01 (1 % speed)**, ensuring workers always
+  have at least a token work rate no matter what configuration is loaded.
+
+---
+
+## [1.9.1] — 2026-06-01
+
+### Fixed
+- **Livestock double-multiply on reload** — `LivestockHerdSetupData` ScriptableObjects
+  persist in memory across scene reloads, so their `numLivestockToBeOverpopulated` value
+  was already multiplied from the previous load when `Start()` fired again. The multiplier
+  was applied on top of an already-multiplied value each reload (8 → 16 → 32 → 64 …).
+  Fixed by storing the original vanilla value in `_originalValues` (never cleared) and
+  always computing the target from the vanilla base, so the result is always `vanilla × mult`
+  regardless of how many times the map is loaded in one session.
+- **Accumulated KP values not reset at load start** — `AccumulatedKpRefund` and
+  `AccumulatedKpCost` were only reset at the end of `TechTreeManager.Load` (in Postfix).
+  If the load was interrupted by an exception before Postfix ran, stale values would carry
+  over to the next load and cause incorrect KP refunds or charges. Both values are now
+  reset in the Prefix (at load start) so each load begins with a clean slate.
+- **`InTechManagerLoad` flag could get stuck after a failed load** — same root cause as
+  above; resetting accumulated values in Prefix also ensures the load state is
+  re-initialized even if a previous load threw before Postfix could clean up.
+
+---
+
 ## [1.9.0-beta] — 2026-05-21
 
 ### Changed

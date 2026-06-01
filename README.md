@@ -35,7 +35,7 @@ A [MelonLoader](https://melonloader.com/) mod for **Farthest Frontier v1.1.0** t
 | **Deep Wells tooltip** — shows current / next water bonus in the tech description (15 languages) | — |
 | **Reset Tech Tree** — refund all researched ranks back to KP on next load (one-shot flag) | off |
 | **Allot All Techs** — fill every tech to its configured cap on each load until disabled | off |
-| **Favored Nation** — configurable safe cap for bazaar sell price reduction | 1 |
+| **Favored Nation** — default 1, safe maximum 9 if you raise it manually in cfg | 1 |
 | **15 UI languages** for mod tooltips (Production Management, Deep Wells) | auto |
 
 ---
@@ -56,21 +56,27 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 
 ### Configurable caps (can be lowered or raised in config)
 
-| Technology | Default cap | Effect per rank |
-|:-----------|:-----------:|:----------------|
-| Favored Nation | 1 | −10 % bazaar sell price |
-| Steel Tools | 9 | −10 % crafting time |
-| Military Logistics | 9 | −10 % crafting time |
-| Spring Pole Lathe | 4 | −20 % crafting time |
-| Stiff-Blade Saw | 4 | −20 % crafting time |
-| Venting Chambers | 6 | −15 % crafting time |
-| Stonecutting | 5 | −20 % mining time |
-| Masonry | 5 | −20 % brick cost |
-| Adjustable Shoe Lasts | 3 | −25 % crafting time |
-| Sustainable Farming | 3 | −25 % fertility loss |
-| Printing Press | 1 | −50 % crafting time |
+| Technology | Default cap | Effect per rank | Notes |
+|:-----------|:-----------:|:----------------|:------|
+| Favored Nation | 1 | −10 % bazaar sell price | Hard clamped to max 9 — rank 10 = zero gold, rank 11+ = negative prices |
+| Steel Tools | 9 | −10 % crafting time | Rank 10 = instant craft (game clamps to 0); cap keeps ≥10 % time |
+| Military Logistics | 9 | −10 % crafting time | Same as above |
+| Production Logistics | 9 | −10 % crafting time | Same as above |
+| Metallurgy | 9 | −10 % crafting time | Same as above |
+| Venting Chambers | 6 | −15 % crafting time | Rank 7 = instant; cap keeps ≥10 % time |
+| Spring Pole Lathe | 4 | −20 % crafting time | Rank 5 = instant; cap keeps ≥20 % time |
+| Stiff-Blade Saw | 4 | −20 % crafting time | Rank 5 = instant; cap keeps ≥20 % time |
+| Stonecutting | 4 | −20 % mining time | Rank 5 = instant; cap keeps ≥20 % time |
+| Adjustable Shoe Lasts | 3 | −25 % crafting time | Rank 4 = instant; cap keeps ≥25 % time |
+| Masonry | 15 | compound −25 % brick cost | **Compound** reduction per rank (not linear); stabilises at 1–2 bricks; game clamps to 0 |
+| Sustainable Farming | 4 | compound −25 % fertility loss | Hard clamped to max 4 — rank 4 = 0 % loss; rank 5+ = fertility restores (infinite fertility) |
+| Printing Press | 1 | −50 % crafting time | Rank 2 = instant; cap keeps 50 % time |
 
-> You can lower any configurable cap. Favored Nation is clamped to a safe maximum of 9; other caps above their safe range may cause unintended results the game cannot recover from.
+> **Work-time reductions** (Steel Tools, Military Logistics, etc.) use `GE_ManufacturingWorkModify`. The game applies `Mathf.Max(0, …)` internally, so work time reaches 0 (instant) rather than going negative. The caps above prevent instant crafting, which can overwhelm the task queue.
+>
+> **Masonry** uses `GE_BuildingMaterialsQtyModify` with a *compound* formula — each rank reduces the **current** brick count by 25 %, not the original. Previous documentation incorrectly described this as linear. The game also clamps brick cost to 0, so no rank can produce negative costs.
+>
+> **Sustainable Farming** and **Favored Nation** are the only configurable techs with hard runtime clamps. Exceeding their safe maximum breaks core game mechanics (infinite fertility / negative trade prices).
 
 ---
 
