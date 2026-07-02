@@ -2,6 +2,59 @@
 
 All notable changes to TechRankExpander are documented here.
 
+## [1.9.4] — 2026-06-28
+
+### Fixed — tech ranks not applied on game version 1.1.2a
+
+In game v1.1.2a, `TechTreeManager.Awake()` was changed from `private` to `protected`.
+Harmony's patch on `Awake` may not fire reliably when the method is `protected` and
+overridden from a base class, causing `NumRanksHelper.Apply()` (which writes the
+extended rank counts into `numRanks`) to never run — so all techs stayed at their
+vanilla 1–3 rank caps despite the config showing the correct values.
+
+Fix: `NumRanksHelper.Apply()` is now also called in the `Prefix` of
+`Patch_TechTreeManager_Load`, which runs before save data is read on every map load.
+This is idempotent (safe to call twice) and guarantees the extended ranks are in place
+before any tech node data is loaded from the save file, regardless of whether the
+`Awake` patch fires.
+
+Thanks to **MatthewKnight** and **AdmiralPCK** on NexusMods for reporting and helping
+diagnose this.
+
+---
+
+## [1.9.3] — 2026-06-25
+
+### Fixed — three techs were never expanded (wrong internal names)
+
+The mod matches each technology by its **internal name** (`TechTreeNodeData.GetTechName()`,
+which returns the English tech name). Three config keys did not match the game's actual
+internal names, so those techs were silently skipped — their rank caps stayed at the
+vanilla maximum (1–3). Once a player maxed them, they could not be researched further
+("stuck at 100%"). Verified by cross-checking every config key against the game's tech
+list in `resources.assets` (`TechTree_TechNNN` localization terms).
+
+- **`Dendrology` → `Silviculture`.** `Dendrology` was actually the name of the tech's
+  *icon sprite* (`ICN_AG_Dendrology01`), not the tech. The real tech name is
+  `Silviculture` (term `TechTree_Tech006`). This is the "tree growth" tech the bug
+  report referenced.
+- **`Horse Armor` → `Horse Barding`** (term `TechTree_Tech049`).
+- **`Mortar-Reinforced Palisades` → `Reinforced Palisades`** (term `TechTree_Tech013`).
+
+The remaining 68 config keys were already matching the game's internal names correctly.
+
+**Config migration note:** after updating, the config file will create three new entries
+at the default cap (20): `Ranks_Silviculture`, `Ranks_Horse_Barding`, and
+`Ranks_Reinforced_Palisades`. The old entries (`Ranks_Dendrology`, `Ranks_Horse_Armor`,
+`Ranks_Mortar_Reinforced_Palisades`) remain in the file but are now ignored — harmless,
+but if you had customised the rank value for any of those three, set it again under the
+new name.
+
+Thanks to **MatthewKnight** on NexusMods for reporting this and correctly spotting that
+the config and tech-tree names differed.
+
+---
+
 ## [1.9.2] — 2026-06-01
 
 ### Fixed — wrong caps (found by decompiling Assembly-CSharp.dll)

@@ -1,7 +1,7 @@
 ================================================================
-  TechRankExpander  v1.9.2
+  TechRankExpander  v2.0.2
   Author : Modder
-  Game   : Farthest Frontier v1.1.0 (Mono / MelonLoader)
+  Game   : Farthest Frontier v1.9.4 (Mono / MelonLoader)
 ================================================================
 
 NEXUSMODS PAGE TITLE
@@ -122,7 +122,7 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   FILE TO UPLOAD ON NEXUSMODS
 ================================================================
-  TechRankExpander_v1.9.2.zip
+  TechRankExpander_v2.0.2.zip
 
   ZIP structure (drop-into-game-folder install):
     Mods/TechRankExpander.dll
@@ -130,6 +130,50 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   NEXUSMODS CHANGELOG (paste into the "Change log" field)
 ================================================================
+v2.0.2 — Fix unlock-only tech cap bypass via cfg
+
+Unlock-only technologies (those that only unlock a building, resource,
+or unit at rank 1 with no repeatable bonus) are now hardcoded to cap=1
+regardless of the UserData/TechRankExpander.cfg file contents.
+
+Previously, if the cfg file was written by an earlier mod version with
+cap=20 for these techs (Animal Husbandry, Cavalry, Forestry, etc.), the
+old values persisted and allowed researching beyond rank 1 — which had
+no gameplay effect but looked wrong in the UI (e.g. "0/20" instead of
+"0/1"). These techs no longer appear in the cfg file at all; their cap
+is always exactly 1.
+
+Full list of affected techs: Animal Husbandry, Commerce Negotiations,
+Coal-Fired Stoves, Intensive Animal Farming, Siege Warfare, Conscription,
+Convenience Tax, Prohibition, Brigandine Armor, Economic Power, Beacon of
+Culture, Gates of Valor, Guilds, Pharmacy, Citadels, Canning, Caseiculture,
+Trade Center, Bookbinding, Hospitalization, School of Thought, Cavalry,
+Reinforced Plating, Tools of War, Grain Crops, Arrow Loops, Market Forces,
+Nursing, Stone Battlements, Forestry, Battlement Fortifications,
+Wonders of the Frontier.
+
+v2.0.0 — Full update for Farthest Frontier v1.9.4
+
+Breaking change: the game's ActivateTechOrRank method gained a new
+knowledgePointCost parameter in v1.9.4. The previous mod version would crash
+on load due to the Harmony patch signature mismatch. Fixed.
+
+Added 40+ new technologies introduced in v1.9.4 to the rank-expansion system:
+Rodent-Proofing, Animal Husbandry, Commerce Negotiations, Coal-Fired Stoves,
+Intensive Animal Farming, Siege Warfare, Conscription, Convenience Tax,
+Prohibition, Brigandine Armor, Economic Power, Beacon of Culture, Gates of
+Valor, Guilds, Pharmacy, Citadels, Canning, Blast Furnace, Quarry, Woodworking,
+Caseiculture, Brewing, Barrel-Making, Trade Center, Bookbinding, Hospitalization,
+School of Thought, Cavalry, Reinforced Plating, Tools of War, Glass Blowing,
+Grain Crops, Arrow Loops, Arms Production, Smithing, Forging, Market Forces,
+Paper Press, Nursing, Stone Battlements, Mining, Forestry, Battlement
+Fortifications, Wonders of the Frontier.
+
+Work-time techs (Blast Furnace, Quarry, Woodworking, Brewing, Barrel-Making,
+Bookbinding, Glass Blowing, Arms Production, Smithing, Forging, Paper Press,
+Mining) default to conservative caps (4 or 9) to preserve nonzero work time.
+All others default to 20. Adjust in UserData/TechRankExpander.cfg.
+
 v1.9.2 — Bug fixes & protection mechanism
 
 Fixed wrong caps (found by decompiling Assembly-CSharp.dll):
@@ -156,7 +200,7 @@ v1.9.1 — Bug fixes
 ================================================================
   Category  : Gameplay
   Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
-  Version   : 1.9.2
-  Game ver. : 1.1.0
+  Version   : 2.0.2
+  Game ver. : 1.9.4
   Requires  : MelonLoader
 ================================================================

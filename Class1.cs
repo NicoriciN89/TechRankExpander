@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "1.9.2", "Modder")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.1.8", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -35,81 +35,98 @@ namespace TechRankExpanderMod
         // ──────────────────────────────────────────────────────────────────────
         internal static readonly Dictionary<string, int> DefaultRanks = new Dictionary<string, int>
         {
+            // ── Vanilla 2-rank techs → expanded to 20 ────────────────────────
             { "Vermicast",                       20 },
             { "Command Structure",               20 },
-            { "Iron Shares",                     20 },
-            { "Sustainable Farming",              4 },  // compound −25% fertility loss/rank; rank 4 = 0% loss (safe); rank 5+ = fertility restored → clamped to 4
             { "Taxation",                        20 },
-            { "Production Management",           20 },
-            { "Marksman Training",               20 },
-            { "Structural Engineering",          20 },
-            { "Animal Rearing",                  20 },
-            { "Rehabilitation",                  20 },
-            { "Border Policies",                 20 },
-            { "Glass Recycling",                 20 },
-            { "Steel Armaments",                 20 },
-            { "Heat-Treated Halberds",           20 },
-            { "Deep Mine Ventilation",           20 },
-            { "Pharmaceutical Study",            20 },
-            { "Favored Nation",                   1 },  // −10% sell price/rank; rank 10 = 0 gold; rank 11+ = negative prices → clamped to max 9
-            { "Steel Tools",                      9 },  // −10% work/rank; rank 10 = instant (game clamps to 0); cap keeps ≥10% work time
-            { "Variolation",                     20 },
             { "Alcohol Sterilization",           20 },
-            { "Beautification",                  20 },
-            { "Masonry",                         15 },  // compound −25% bricks/rank (reduces current qty, not original); stabilises at 1–2 bricks; game clamps to 0
-            // "Civic Inspections" hardcoded to 3 — NOT configurable.
-            // GE_OccupationWorkRate (negative modifier); rank 4+ → negative work rate → firefighters freeze.
             { "Military Logistics",               9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
-            { "Horse Armor",                     20 },
-            { "Wheel-Lock Crossbow",             20 },
             { "Scientific Discovery",            20 },
-            { "Printing Press",                   1 },  // −50% work/rank; rank 2 = instant; cap keeps 50% work time
-            { "Advanced Metal-Casting",          20 },
-            { "Fire Assaying",                   20 },
-            { "Spring Pole Lathe",                4 },  // −20% work/rank; rank 5 = instant; cap keeps ≥20% work time
             { "Sustainable Forestry",            20 },
-            { "Treadwheel Crane",                20 },
-            { "Iron-Rimmed Wheels",              20 },
             { "Selective Breeding: Grains",      20 },
             { "Selective Breeding: Non-Grain",   20 },
-            { "Steel Surgical Tools",            20 },
             { "Metallurgy",                       9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
-            { "Drought Tolerance",               20 },
-            { "Midwives",                        20 },
-            { "Ratting Dogs",                    20 },
-            { "Deep Wells",                      20 },
             { "Architecture",                    20 },
-            { "Fortification Engineering",       20 },
             { "Soldier Training",                20 },
-            { "Tower Shields",                   20 },
             { "Scientific Method",               20 },
-            { "Cast-Iron Axe Blades",            20 },
-            { "Adjustable Shoe Lasts",            3 },  // −25% work/rank; rank 4 = instant; cap keeps ≥25% work time
             { "Production Logistics",             9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
-            { "Spindlewick Production",          20 },
-            { "Wax-Sealed Barrels",              20 },
-            { "Stiff-Blade Saw",                  4 },  // −20% work/rank; rank 5 = instant; cap keeps ≥20% work time
-            { "Heavy Freight Wagons",            20 },
-            { "Foothold Traps",                  20 },
-            { "Double-Walled Hives",             20 },
             { "Disease Resistance",              20 },
             { "Artificial Selection",            20 },
-            { "Mortar-Reinforced Palisades",     20 },
+            { "Defensive Barricades",            20 },
+            { "Double-Walled Hives",             20 },
+            { "Animal Rearing",                  20 },
+            { "Glass Recycling",                 20 },
+            { "Steel Armaments",                 20 },
+            { "Structural Engineering",          20 },
+            { "Drought Tolerance",               20 },
+            { "Dendrology",                      20 },  // display name "Silviculture"; GetTechName() returns "Dendrology"
+
+            // ── Vanilla 3-rank techs → expanded to 20 ────────────────────────
+            { "Woodlore",                        20 },
+            { "Beautification",                  20 },
+            { "Deep Mine Ventilation",           20 },
+            { "Deep Wells",                      20 },
+
+            // ── Vanilla 1-rank techs with scaleable % effect → expanded ──────
+            // These apply a repeatable bonus per rank; safe caps where needed.
+            { "Sustainable Farming",              3 },  // compound −25% fertility loss/rank; rank 3 = 25% loss (safe margin); rank 4 = 0% loss (edge); rank 5+ = fertility restored → clamped to 3
+            { "Production Management",           20 },
+            { "Marksman Training",               20 },
+            { "Rehabilitation",                  20 },
+            { "Pharmaceutical Study",            20 },
+            { "Favored Nation",                   1 },  // −10% sell price/rank; rank 10 = 0 gold; rank 11+ = negative prices → clamped to max 9
+            { "Steel Tools",                      9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
+            { "Variolation",                     20 },
+            { "Masonry",                         15 },  // compound −25% bricks/rank (current qty); stabilises at 1–2 bricks
+            // "Civic Inspections" hardcoded to 3 — NOT configurable.
+            { "Horse Armor",                     20 },  // display name "Horse Barding"; GetTechName() returns "Horse Armor"
+            { "Wheel-Lock Crossbow",             20 },
+            { "Printing Press",                   1 },  // −50% work/rank; rank 2 = instant; cap keeps 50% work time
+            { "Fire Assaying",                   20 },
+            { "Spring Pole Lathe",                4 },  // −20% work/rank; rank 5 = instant
+            { "Treadwheel Crane",                20 },
+            { "Iron-Rimmed Wheels",              20 },
+            { "Steel Surgical Tools",            20 },
+            { "Midwives",                        20 },
+            { "Ratting Dogs",                    20 },
+            { "Fortification Engineering",       20 },
+            { "Tower Shields",                   20 },
+            { "Cast-Iron Axe Blades",            20 },
+            { "Adjustable Shoe Lasts",            3 },  // −25% work/rank; rank 4 = instant
+            { "Spindlewick Production",          20 },
+            { "Wax-Sealed Barrels",              20 },
+            { "Stiff-Blade Saw",                  4 },  // −20% work/rank; rank 5 = instant
+            { "Heavy Freight Wagons",            20 },
+            { "Foothold Traps",                  20 },
+            { "Mortar-Reinforced Palisades",     20 },  // display name "Reinforced Palisades"; GetTechName() returns "Mortar-Reinforced Palisades"
             { "Trailblazing",                    20 },
             // Hygiene capped at 4 in code — not configurable.
-            // GE_DiseaseChanceAndSpreadModify uses Clamp01 internally; rank 5+ is safe but redundant.
-            // { "Hygiene",                         20 },
             { "Spotters",                        20 },
-            { "Defensive Barricades",            20 },
             { "Militia",                         20 },
             { "Natural Philosophy",              20 },
-            { "Dendrology",                      20 },
             { "Sustainable Fishing",             20 },
-            { "Venting Chambers",                 6 },  // −15% work/rank; rank 7 = instant; cap keeps ≥10% work time
-            { "Stonecutting",                     4 },  // −20% work/rank; rank 5 = instant; cap keeps ≥20% work time
-            { "Woodlore",                        20 },
+            { "Venting Chambers",                 6 },  // −15% work/rank; rank 7 = instant
+            { "Stonecutting",                     4 },  // −20% work/rank; rank 5 = instant
+            { "Iron Shares",                     20 },
+            { "Border Policies",                 20 },
+            { "Heat-Treated Halberds",           20 },
             // "Sheet Composting" hardcoded to 3 — NOT configurable.
-            // GE_OccupationWorkRate (negative modifier); rank 4+ → negative work rate → Compost Yard breaks.
+            // "Blast Furnace" — unlock-only (upgrades Foundry to Smelter), hardcoded to 1 below
+            // "Woodworking"   — unlock-only (upgrades Woodcutter Yard + Sawpit), hardcoded to 1 below
+            // "Quarry"        — unlock-only (opens Quarry building), hardcoded to 1 below
+            // "Brewing"       — unlock-only (opens Brewery), hardcoded to 1 below
+            // "Barrel-Making" — unlock-only (opens Cooper), hardcoded to 1 below
+            // "Glass Blowing" — unlock-only (opens Glassmaker), hardcoded to 1 below
+            // "Arms Production" — unlock-only (opens Armory), hardcoded to 1 below
+            // "Smithing"      — unlock-only (opens Blacksmith Forge), hardcoded to 1 below
+            // "Forging"       — unlock-only (opens Smithy/advanced forge), hardcoded to 1 below
+            // "Paper Press"   — unlock-only (opens Paper Mill), hardcoded to 1 below
+            // "Mining"        — unlock-only (opens Mines), hardcoded to 1 below
+            // "Advanced Metal-Casting" — unlock-only (opens Foundry), hardcoded to 1 below
+            // "Forestry" — unlock-only (upgrades Worker Camp to Forester Camp), hardcoded to 1 below
+
+            // Unlock-only techs (cap = 1) are NOT listed here — they are hardcoded
+            // in RefreshRuntimeConfig() to prevent old cfg values from overriding them.
         };
     }
 
@@ -514,7 +531,8 @@ namespace TechRankExpanderMod
     [HarmonyPatch(typeof(TechTreeManager), nameof(TechTreeManager.ActivateTechOrRank))]
     internal static class Patch_ActivateTechOrRank
     {
-        static void Postfix(TechTreeManager __instance, int id, bool onLoad)
+        // Signature changed in v1.9.4: ActivateTechOrRank(int id, int knowledgePointCost, bool onLoad)
+        static void Postfix(TechTreeManager __instance, int id, int knowledgePointCost, bool onLoad)
         {
             if (!onLoad)
             {
@@ -649,8 +667,13 @@ namespace TechRankExpanderMod
     [HarmonyPatch(typeof(TechTreeManager), "Load", new System.Type[] { typeof(ES2Reader) })]
     internal static class Patch_TechTreeManager_Load
     {
-        static void Prefix()
+        static void Prefix(TechTreeManager __instance)
         {
+            // Re-apply numRanks here as a safety net for game versions where Awake()
+            // is protected and Harmony may not hook it reliably (observed in v1.1.2a).
+            // Running Apply again is idempotent — it just overwrites the same values.
+            NumRanksHelper.Apply(__instance);
+
             // Reset accumulated values at load start so a previously interrupted load
             // (exception before Postfix ran) cannot corrupt the next load's KP math.
             TechResetHelper.InTechManagerLoad = true;
@@ -739,16 +762,25 @@ namespace TechRankExpanderMod
             // Build the fast lookup cache while we iterate the tech list anyway
             TechCache.Build(ttm);
 
+            // Now that TechCache is ready, localized tech names are available —
+            // refresh cfg descriptions so they show the in-game name for the current language.
+            TechRankExpander.Instance?.RefreshDescriptions();
+
             int count = 0;
+            var missedActiveRanks = new System.Collections.Generic.HashSet<string>(RuntimeConfig.ActiveRanks.Keys);
             foreach (var tech in ttm.techTreeNodeData)
             {
-                if (RuntimeConfig.ActiveRanks.TryGetValue(tech.GetTechName(), out int overrideRanks))
+                string name = tech.GetTechName();
+                missedActiveRanks.Remove(name);
+                if (RuntimeConfig.ActiveRanks.TryGetValue(name, out int overrideRanks))
                 {
                     _field.SetValue(tech, overrideRanks);
                     count++;
                 }
             }
             MelonLogger.Msg($"[TechRankExpander] numRanks written on {count} tech nodes; cache built ({TechCache.ById.Count} entries).");
+            if (missedActiveRanks.Count > 0)
+                MelonLogger.Warning($"[TechRankExpander] {missedActiveRanks.Count} ActiveRanks keys had no matching tech: {string.Join(", ", missedActiveRanks)}");
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
@@ -933,6 +965,332 @@ namespace TechRankExpanderMod
 
         internal static void Reset() { _appliedBonus = 0f; }
     }
+    // ── CFG description localisation ──────────────────────────────────────────
+    internal static class CfgL10n
+    {
+        // Returns description text in the current game language, falling back to English.
+        internal static string Get(string en, string ru, string de, string fr, string es,
+                                   string it, string pt, string pl, string sv,
+                                   string ko, string ja, string cs)
+        {
+            // Use I2Loc if available (in-game language changes), fall back to PlayerPrefs
+            // (OnInitializeMelon runs before I2Loc is fully initialized).
+            string lang = I2.Loc.LocalizationManager.CurrentLanguage;
+            if (string.IsNullOrEmpty(lang))
+                lang = UnityEngine.PlayerPrefs.GetString("currentLanguage", "English");
+            switch (lang)
+            {
+                case "Russian":    return ru;
+                case "German":     return de;
+                case "French":     return fr;
+                case "Spanish":    return es;
+                case "Italian":    return it;
+                case "Portuguese": return pt;
+                case "Polish":     return pl;
+                case "Swedish":    return sv;
+                case "Korean":     return ko;
+                case "Japanese":   return ja;
+                case "Czech":      return cs;
+                default:           return en;
+            }
+        }
+
+        // Shorthand: single-language lookup table for descriptions used at cfg creation time.
+        internal static string KpSpeed() => Get(
+            "How many times faster knowledge points are generated (e.g. 5 = 5x faster).",
+            "Во сколько раз быстрее генерируются очки знаний (например, 5 = в 5 раз быстрее).",
+            "Wie viel mal schneller Wissenspunkte generiert werden (z.B. 5 = 5× schneller).",
+            "Combien de fois plus vite les points de connaissance sont générés (ex. 5 = 5× plus vite).",
+            "Cuántas veces más rápido se generan los puntos de conocimiento (p.ej. 5 = 5× más rápido).",
+            "Quante volte più velocemente vengono generati i punti conoscenza (es. 5 = 5× più veloce).",
+            "Quantas vezes mais rápido os pontos de conhecimento são gerados (ex.: 5 = 5× mais rápido).",
+            "Ile razy szybciej są generowane punkty wiedzy (np. 5 = 5× szybciej).",
+            "Hur många gånger snabbare kunskapspoäng genereras (t.ex. 5 = 5× snabbare).",
+            "지식 포인트가 생성되는 속도 배율 (예: 5 = 5배 빠름).",
+            "知識ポイントの生成速度の倍率（例：5 = 5倍速）。",
+            "Kolikrát rychleji jsou generovány body znalostí (např. 5 = 5× rychleji).");
+
+        internal static string CarryCap() => Get(
+            "Multiplier on how much weight each villager can carry per trip (e.g. 3 = 3x more items).",
+            "Множитель переносимого веса для каждого жителя за поездку (например, 3 = в 3 раза больше предметов).",
+            "Multiplikator für das Gewicht, das jeder Dorfbewohner pro Reise tragen kann (z.B. 3 = 3× mehr).",
+            "Multiplicateur de la charge que chaque villageois peut porter par voyage (ex. 3 = 3× plus).",
+            "Multiplicador de cuánto peso puede cargar cada aldeano por viaje (p.ej. 3 = 3× más).",
+            "Moltiplicatore del peso che ogni abitante può trasportare per viaggio (es. 3 = 3× di più).",
+            "Multiplicador de quanto peso cada aldeão pode carregar por viagem (ex.: 3 = 3× mais).",
+            "Mnożnik wagi, którą każdy wieśniak może nieść na jedną podróż (np. 3 = 3× więcej).",
+            "Multiplikator för hur mycket varje bybor kan bära per resa (t.ex. 3 = 3× mer).",
+            "주민 1인당 운반 가능 무게 배율 (예: 3 = 3배 더 많은 아이템).",
+            "村人1人が1回の移動で運べる重量の倍率（例：3 = 3倍）。",
+            "Kolikrát více váhy může každý vesničan unést na jednu cestu (např. 3 = 3× více).");
+
+        internal static string WorkSpeed() => Get(
+            "Bonus to all workers' speed per rank of Production Management purchased (0.01 = +1% per rank).",
+            "Бонус к скорости всех рабочих за каждый ранг 'Управления производством' (0.01 = +1% за ранг).",
+            "Bonus auf die Arbeitsgeschwindigkeit aller Arbeiter pro Rang 'Produktionsmanagement' (0.01 = +1% pro Rang).",
+            "Bonus à la vitesse de tous les travailleurs par rang de Gestion de la Production (0.01 = +1% par rang).",
+            "Bono a la velocidad de todos los trabajadores por rango de Gestión de Producción (0.01 = +1% por rango).",
+            "Bonus alla velocità di tutti i lavoratori per rango di Gestione della Produzione (0.01 = +1% per rango).",
+            "Bônus à velocidade de todos os trabalhadores por nível de Gestão de Produção (0.01 = +1% por nível).",
+            "Bonus do prędkości wszystkich pracowników za każdy rząd Zarządzania Produkcją (0.01 = +1% na rząd).",
+            "Bonus till alla arbetares hastighet per rang av Produktionsledning (0.01 = +1% per rang).",
+            "생산 관리 등급당 모든 노동자 속도 보너스 (0.01 = 등급당 +1%).",
+            "生産管理の各ランクごとの全労働者速度ボーナス（0.01 = ランクごとに+1%）。",
+            "Bonus k rychlosti všech pracovníků za každý rank Řízení výroby (0.01 = +1% za rank).");
+
+        internal static string ResetTree() => Get(
+            "Set to true to refund ALL spent KP and reset ALL tech ranks on the next map load. The flag is automatically cleared after applying.",
+            "Установите true для возврата всех потраченных ОЗ и сброса всех рангов технологий при следующей загрузке карты. Флаг очищается автоматически.",
+            "Auf true setzen, um alle ausgegebenen WP zurückzuerstatten und alle Tech-Ränge beim nächsten Kartenladen zurückzusetzen. Das Flag wird automatisch gelöscht.",
+            "Mettre à true pour rembourser tous les PC dépensés et réinitialiser tous les rangs technologiques au prochain chargement. Le drapeau est effacé automatiquement.",
+            "Poner en true para reembolsar todos los PC gastados y restablecer todos los rangos de tecnología en la próxima carga. El indicador se borra automáticamente.",
+            "Impostare su true per rimborsare tutti i PC spesi e azzerare tutti i ranghi tecnologici al prossimo caricamento. Il flag viene cancellato automaticamente.",
+            "Definir como true para reembolsar todos os PC gastos e redefinir todos os níveis de tecnologia no próximo carregamento. O sinalizador é apagado automaticamente.",
+            "Ustaw na true, aby zwrócić wszystkie wydane PW i zresetować wszystkie rangi technologii przy następnym ładowaniu mapy. Flaga jest czyszczona automatycznie.",
+            "Sätt till true för att återbetala alla spenderade KP och återställa alla teknikranker vid nästa kartladdning. Flaggan rensas automatiskt.",
+            "true로 설정하면 다음 맵 로드 시 모든 KP를 환불하고 기술 등급을 초기화합니다. 플래그는 자동으로 지워집니다.",
+            "trueに設定すると、次のマップ読み込み時にすべてのKPを返還し、すべての技術ランクをリセットします。フラグは自動的にクリアされます。",
+            "Nastavte na true, abyste vrátili všechny utracené BP a resetovali všechny ranky technologií při příštím načtení mapy. Příznak je automaticky vymazán.");
+
+        internal static string AllotAll() => Get(
+            "Set to true to instantly fill ALL tech ranks to their configured caps on the next map load (spends KP). The setting stays enabled until you turn it off manually.",
+            "Установите true, чтобы при следующей загрузке карты все ранги технологий были выкуплены до максимума (тратит ОЗ). Настройка остаётся включённой, пока вы не выключите её вручную.",
+            "Auf true setzen, um beim nächsten Kartenladen alle Tech-Ränge sofort auf ihre konfigurierten Obergrenzen aufzufüllen (kostet WP). Die Einstellung bleibt aktiv, bis sie manuell deaktiviert wird.",
+            "Mettre à true pour remplir instantanément tous les rangs technologiques à leurs limites configurées au prochain chargement (dépense des PC). Le paramètre reste activé jusqu'à ce que vous le désactiviez manuellement.",
+            "Poner en true para rellenar instantáneamente todos los rangos de tecnología hasta sus límites configurados en la próxima carga (gasta PC). La configuración permanece habilitada hasta que la desactives manualmente.",
+            "Impostare su true per riempire istantaneamente tutti i ranghi tecnologici ai loro limiti configurati al prossimo caricamento (spende PC). L'impostazione rimane abilitata finché non la disabiliti manualmente.",
+            "Definir como true para preencher instantaneamente todos os níveis de tecnologia até seus limites configurados no próximo carregamento (gasta PC). A configuração permanece ativa até que você a desative manualmente.",
+            "Ustaw na true, aby natychmiast uzupełnić wszystkie rangi technologii do skonfigurowanych limitów przy następnym ładowaniu mapy (wydaje PW). Ustawienie pozostaje włączone, dopóki ręcznie go nie wyłączysz.",
+            "Sätt till true för att omedelbart fylla alla teknikranker till deras konfigurerade tak vid nästa kartladdning (spenderar KP). Inställningen förblir aktiverad tills du stänger av den manuellt.",
+            "true로 설정하면 다음 맵 로드 시 모든 기술 등급을 설정된 최대치로 즉시 채웁니다 (KP 소모). 수동으로 끌 때까지 설정이 유지됩니다.",
+            "trueに設定すると、次のマップ読み込み時にすべての技術ランクを設定された上限まで即座に埋めます（KP消費）。手動でオフにするまで設定は有効です。",
+            "Nastavte na true, abyste okamžitě vyplnili všechny ranky technologií na jejich nakonfigurované limity při příštím načtení mapy (utrácí BP). Nastavení zůstane aktivní, dokud ho ručně nevypnete.");
+
+        internal static string DeepWells() => Get(
+            "Extra water capacity added to every well per rank of the 'Deep Wells' technology. 50 = +50 water per rank (e.g. rank 5 → +250 capacity). 0 = disabled. Bonus is applied when the map loads.",
+            "Дополнительный объём воды в каждом колодце за каждый ранг технологии 'Глубокие колодцы'. 50 = +50 воды за ранг (например, 5 рангов → +250 ёмкости). 0 = отключено. Бонус применяется при загрузке карты.",
+            "Zusätzliche Wasserkapazität für jeden Brunnen pro Rang der Technologie 'Tiefe Brunnen'. 50 = +50 Wasser pro Rang. 0 = deaktiviert. Bonus wird beim Kartenladen angewendet.",
+            "Capacité d'eau supplémentaire ajoutée à chaque puits par rang de la technologie 'Puits profonds'. 50 = +50 eau par rang. 0 = désactivé. Le bonus est appliqué au chargement de la carte.",
+            "Capacidad de agua adicional añadida a cada pozo por rango de la tecnología 'Pozos profundos'. 50 = +50 agua por rango. 0 = desactivado. El bono se aplica al cargar el mapa.",
+            "Capacità d'acqua extra aggiunta a ogni pozzo per rango della tecnologia 'Pozzi profondi'. 50 = +50 acqua per rango. 0 = disabilitato. Il bonus viene applicato al caricamento della mappa.",
+            "Capacidade de água extra adicionada a cada poço por nível da tecnologia 'Poços Profundos'. 50 = +50 de água por nível. 0 = desativado. O bônus é aplicado ao carregar o mapa.",
+            "Dodatkowa pojemność wody dodawana do każdej studni za każdy rząd technologii 'Głębokie studnie'. 50 = +50 wody na rząd. 0 = wyłączone. Bonus jest stosowany podczas ładowania mapy.",
+            "Extra vattenkapacitet tillagd till varje brunn per rang av teknologin 'Djupa brunnar'. 50 = +50 vatten per rang. 0 = inaktiverat. Bonusen tillämpas när kartan laddas.",
+            "'깊은 우물' 기술 등급당 각 우물에 추가되는 물 용량. 50 = 등급당 +50. 0 = 비활성화. 보너스는 맵 로드 시 적용됩니다.",
+            "'深い井戸'技術のランクごとに各井戸に追加される水の容量。50 = ランクごとに+50。0 = 無効。ボーナスはマップ読み込み時に適用されます。",
+            "Extra vodní kapacita přidaná ke každé studni za každý rank technologie 'Hluboké studny'. 50 = +50 vody na rank. 0 = zakázáno. Bonus je aplikován při načtení mapy.");
+
+        internal static string KpHotkey() => Get(
+            "Press this key in-game to instantly add KP_Hotkey_Amount knowledge points. Valid values: F1-F12, K, Insert, etc. (UnityEngine.KeyCode names).",
+            "Нажмите эту клавишу в игре для мгновенного добавления очков знаний. Допустимые значения: F1-F12, K, Insert и т.д. (имена UnityEngine.KeyCode).",
+            "Drücken Sie diese Taste im Spiel, um sofort KP_Hotkey_Amount Wissenspunkte hinzuzufügen. Gültige Werte: F1-F12, K, Insert usw. (UnityEngine.KeyCode-Namen).",
+            "Appuyez sur cette touche en jeu pour ajouter instantanément des PC. Valeurs valides : F1-F12, K, Insert, etc. (noms UnityEngine.KeyCode).",
+            "Presione esta tecla en el juego para agregar instantáneamente PC. Valores válidos: F1-F12, K, Insert, etc. (nombres de UnityEngine.KeyCode).",
+            "Premi questo tasto nel gioco per aggiungere istantaneamente PC. Valori validi: F1-F12, K, Insert, ecc. (nomi UnityEngine.KeyCode).",
+            "Pressione esta tecla no jogo para adicionar PC instantaneamente. Valores válidos: F1-F12, K, Insert, etc. (nomes UnityEngine.KeyCode).",
+            "Naciśnij ten klawisz w grze, aby natychmiast dodać PW. Prawidłowe wartości: F1-F12, K, Insert itp. (nazwy UnityEngine.KeyCode).",
+            "Tryck på denna tangent i spelet för att omedelbart lägga till KP. Giltiga värden: F1-F12, K, Insert, etc. (UnityEngine.KeyCode-namn).",
+            "게임 내에서 이 키를 눌러 즉시 KP를 추가합니다. 유효한 값: F1-F12, K, Insert 등 (UnityEngine.KeyCode 이름).",
+            "ゲーム内でこのキーを押すとKPを即座に追加します。有効な値：F1-F12、K、Insertなど（UnityEngine.KeyCode名）。",
+            "Stiskněte tuto klávesu ve hře pro okamžité přidání BP. Platné hodnoty: F1-F12, K, Insert atd. (názvy UnityEngine.KeyCode).");
+
+        internal static string KpHotkeyAmount() => Get(
+            "How many knowledge points to add per key press.",
+            "Сколько очков знаний добавлять за одно нажатие клавиши.",
+            "Wie viele Wissenspunkte pro Tastendruck hinzugefügt werden.",
+            "Combien de points de connaissance ajouter par pression de touche.",
+            "Cuántos puntos de conocimiento añadir por pulsación de tecla.",
+            "Quanti punti conoscenza aggiungere per ogni pressione del tasto.",
+            "Quantos pontos de conhecimento adicionar por pressionamento de tecla.",
+            "Ile punktów wiedzy dodawać za każde naciśnięcie klawisza.",
+            "Hur många kunskapspoäng som läggs till per tangenttryckning.",
+            "키를 누를 때마다 추가할 지식 포인트 수.",
+            "キーを1回押すごとに追加する知識ポイントの数。",
+            "Kolik bodů znalostí přidat za každý stisk klávesy.");
+
+        internal static string MaxWax() => Get(
+            "Maximum wax consumed per barrel production. 1 = always 1 wax, 2 = capped at vanilla value (default), 0 = removes wax from recipe entirely.",
+            "Максимум воска на производство одной бочки. 1 = всегда 1 воск, 2 = не выше значения ванили (по умолчанию), 0 = убрать воск из рецепта.",
+            "Maximales Wachs pro Fassproduktion. 1 = immer 1 Wachs, 2 = begrenzt auf Vanilla-Wert (Standard), 0 = Wachs vollständig aus Rezept entfernen.",
+            "Cire maximale consommée par production de tonneau. 1 = toujours 1 cire, 2 = limité à la valeur vanilla (défaut), 0 = retire la cire de la recette.",
+            "Cera máxima consumida por producción de barril. 1 = siempre 1 cera, 2 = limitado al valor vanilla (predeterminado), 0 = eliminar cera de la receta.",
+            "Cera massima consumata per produzione di botte. 1 = sempre 1 cera, 2 = limitato al valore vanilla (predefinito), 0 = rimuove la cera dalla ricetta.",
+            "Cera máxima consumida por produção de barril. 1 = sempre 1 cera, 2 = limitado ao valor vanilla (padrão), 0 = remove a cera da receita.",
+            "Maksymalny wosk zużywany na produkcję beczki. 1 = zawsze 1 wosk, 2 = ograniczone do wartości vanilla (domyślnie), 0 = usuwa wosk z przepisu.",
+            "Maximalt vax förbrukat per tunnproduktion. 1 = alltid 1 vax, 2 = begränsat till vanilla-värde (standard), 0 = tar bort vax från receptet.",
+            "배럴 생산당 소비되는 최대 밀랍. 1 = 항상 1, 2 = 바닐라 값으로 제한 (기본값), 0 = 레시피에서 밀랍 제거.",
+            "バレル生産あたりの最大ワックス消費量。1 = 常に1、2 = バニラ値に制限（デフォルト）、0 = レシピからワックスを削除。",
+            "Maximální vosk spotřebovaný na výrobu sudu. 1 = vždy 1 vosk, 2 = omezeno na hodnotu vanilla (výchozí), 0 = odstranit vosk z receptu.");
+
+        internal static string LivestockCap() => Get(
+            "Multiplier on the maximum number of animals in every barn type. 2 = double capacity, 1 = vanilla. Takes effect on next map load.",
+            "Множитель максимального числа животных во всех типах построек. 2 = двойная вместимость, 1 = ваниль. Вступает в силу при следующей загрузке карты.",
+            "Multiplikator für die maximale Anzahl von Tieren in jedem Stalltyp. 2 = doppelte Kapazität, 1 = Vanilla. Wirkt beim nächsten Kartenladen.",
+            "Multiplicateur du nombre maximum d'animaux dans chaque type d'étable. 2 = double capacité, 1 = vanilla. Prend effet au prochain chargement de la carte.",
+            "Multiplicador del número máximo de animales en cada tipo de establo. 2 = doble capacidad, 1 = vanilla. Tiene efecto en la próxima carga del mapa.",
+            "Moltiplicatore del numero massimo di animali in ogni tipo di stalla. 2 = doppia capacità, 1 = vanilla. Ha effetto al prossimo caricamento della mappa.",
+            "Multiplicador do número máximo de animais em cada tipo de celeiro. 2 = capacidade dupla, 1 = vanilla. Entra em vigor no próximo carregamento do mapa.",
+            "Mnożnik maksymalnej liczby zwierząt w każdym typie stajni. 2 = podwójna pojemność, 1 = vanilla. Wchodzi w życie przy następnym ładowaniu mapy.",
+            "Multiplikator för maximalt antal djur i varje stalltyp. 2 = dubbel kapacitet, 1 = vanilla. Träder i kraft vid nästa kartladdning.",
+            "모든 축사 유형의 최대 동물 수 배율. 2 = 두 배 수용량, 1 = 기본값. 다음 맵 로드 시 적용됩니다.",
+            "すべての納屋タイプの最大動物数の倍率。2 = 2倍の収容量、1 = バニラ。次のマップ読み込み時に有効になります。",
+            "Násobitel maximálního počtu zvířat v každém typu stáje. 2 = dvojnásobná kapacita, 1 = vanilla. Účinné při příštím načtení mapy.");
+
+        // Static techName → ID map extracted from level1 binary.
+        // Allows localized name lookup before TechCache is built (i.e. on game start).
+        private static readonly Dictionary<string, int> _techNameToId = new Dictionary<string, int>
+        {
+            { "Stonecutting",                     3   },
+            { "Dendrology",                        6   },  // display name: Silviculture
+            { "Natural Philosophy",               7   },
+            { "Spotters",                        10   },
+            { "Hygiene",                         11   },
+            { "Trailblazing",                    12   },
+            { "Mortar-Reinforced Palisades",      13   },  // display name: Reinforced Palisades
+            { "Artificial Selection",            14   },
+            { "Disease Resistance",              15   },
+            { "Double-Walled Hives",             16   },
+            { "Foothold Traps",                  17   },
+            { "Heavy Freight Wagons",            18   },
+            { "Stiff-Blade Saw",                 19   },
+            { "Wax-Sealed Barrels",              20   },
+            { "Spindlewick Production",          21   },
+            { "Production Logistics",            22   },
+            { "Adjustable Shoe Lasts",           23   },
+            { "Cast-Iron Axe Blades",            24   },
+            { "Scientific Method",               25   },
+            { "Tower Shields",                   26   },
+            { "Soldier Training",                27   },
+            { "Fortification Engineering",       28   },
+            { "Architecture",                    29   },
+            { "Deep Wells",                      30   },
+            { "Ratting Dogs",                    31   },
+            { "Midwives",                        32   },
+            { "Drought Tolerance",               33   },
+            { "Metallurgy",                      34   },
+            { "Steel Surgical Tools",            35   },
+            { "Animal Husbandry",                37   },
+            { "Selective Breeding: Non-Grain",   38   },
+            { "Selective Breeding: Grains",      39   },
+            { "Iron-Rimmed Wheels",              40   },
+            { "Treadwheel Crane",                41   },
+            { "Sustainable Forestry",            42   },
+            { "Spring Pole Lathe",               43   },
+            { "Fire Assaying",                   44   },
+            { "Advanced Metal-Casting",          45   },
+            { "Printing Press",                  46   },
+            { "Scientific Discovery",            47   },
+            { "Wheel-Lock Crossbow",             48   },
+            { "Horse Armor",                      49   },  // display name: Horse Barding
+            { "Military Logistics",              50   },
+            { "Civic Inspections",               51   },
+            { "Masonry",                         52   },
+            { "Beautification",                  54   },
+            { "Coal-Fired Stoves",               55   },
+            { "Alcohol Sterilization",           56   },
+            { "Variolation",                     57   },
+            { "Steel Tools",                     58   },
+            { "Favored Nation",                  59   },
+            { "Pharmaceutical Study",            60   },
+            { "Intensive Animal Farming",        61   },
+            { "Deep Mine Ventilation",           62   },
+            { "Heat-Treated Halberds",           63   },
+            { "Steel Armaments",                 64   },
+            { "Conscription",                    66   },
+            { "Glass Recycling",                 67   },
+            { "Border Policies",                 68   },
+            { "Convenience Tax",                 69   },
+            { "Prohibition",                     70   },
+            { "Rehabilitation",                  71   },
+            { "Brigandine Armor",                73   },
+            { "Economic Power",                  74   },
+            { "Beacon of Culture",               75   },
+            { "Gates of Valor",                  76   },
+            { "Guilds",                          77   },
+            { "Pharmacy",                        78   },
+            { "Citadels",                        79   },
+            { "Canning",                         81   },
+            { "Blast Furnace",                   82   },
+            { "Quarry",                          83   },
+            { "Woodworking",                     84   },
+            { "Caseiculture",                    85   },
+            { "Animal Rearing",                  86   },
+            { "Brewing",                         87   },
+            { "Barrel-Making",                   88   },
+            { "Trade Center",                    89   },
+            { "Bookbinding",                     90   },
+            { "Hospitalization",                 91   },
+            { "School of Thought",               92   },
+            { "Cavalry",                         93   },
+            { "Reinforced Plating",              94   },
+            { "Tools of War",                    95   },
+            { "Glass Blowing",                   96   },
+            { "Grain Crops",                     97   },
+            { "Arrow Loops",                     98   },
+            { "Arms Production",                 99   },
+            { "Smithing",                       100   },
+            { "Forging",                        101   },
+            { "Structural Engineering",         102   },
+            { "Market Forces",                  103   },
+            { "Paper Press",                    104   },
+            { "Nursing",                        105   },
+            { "Stone Battlements",              106   },
+            { "Marksman Training",              107   },
+            { "Production Management",          108   },
+            { "Mining",                         109   },
+            { "Forestry",                       110   },
+            { "Taxation",                       111   },
+            { "Commerce Negotiations",          112   },
+            { "Sustainable Farming",            113   },
+            { "Battlement Fortifications",      114   },
+            { "Iron Shares",                    116   },
+            { "Command Structure",              117   },
+            { "Vermicast",                      118   },
+            { "Woodlore",                         2   },
+            { "Sheet Composting",                 1   },
+            { "Defensive Barricades",             9   },
+            // Rodent-Proofing, Siege Warfare, Wonders of the Frontier — not present in TechTreeManager v1.9.4
+        };
+
+        // Returns the tech's localized display name as shown in the tech tree panel,
+        // e.g. "Métallurgie" for French. Falls back to the internal techName if not found.
+        internal static string GetLocalizedTechName(string techName)
+        {
+            // First try TechCache (available after map load — most accurate)
+            if (TechCache.ByName.TryGetValue(techName, out var node))
+            {
+                string key1 = "TechTree_Tech" + node.GetId().ToString("D3");
+                string loc1 = I2.Loc.LocalizationManager.GetTranslation(key1);
+                if (!string.IsNullOrEmpty(loc1)) return loc1;
+            }
+            // Fall back to static ID map (available immediately on game start)
+            if (_techNameToId.TryGetValue(techName, out int id))
+            {
+                string key2 = "TechTree_Tech" + id.ToString("D3");
+                string loc2 = I2.Loc.LocalizationManager.GetTranslation(key2);
+                if (!string.IsNullOrEmpty(loc2)) return loc2;
+            }
+            return techName;
+        }
+
+        internal static string RankEntry(string techName)
+        {
+            string loc = GetLocalizedTechName(techName);
+            return Get(
+                $"Max ranks for \"{loc}\".",
+                $"Макс. рангов для \"{loc}\".",
+                $"Maximale Ränge für \"{loc}\".",
+                $"Rangs maximum pour \"{loc}\".",
+                $"Rangos máximos para \"{loc}\".",
+                $"Ranghi massimi per \"{loc}\".",
+                $"Níveis máximos para \"{loc}\".",
+                $"Maksymalne rangi dla \"{loc}\".",
+                $"Maximala ranker för \"{loc}\".",
+                $"\"{loc}\"의 최대 등급.",
+                $"\"{loc}\"の最大ランク。",
+                $"Maximální ranky pro \"{loc}\".");
+        }
+    }
     // ──────────────────────────────────────────────────────────────────────────
     public class TechRankExpander : MelonMod
     {
@@ -963,77 +1321,52 @@ namespace TechRankExpanderMod
             _kpSpeedEntry = _cat.CreateEntry(
                 "KP_Speed_Multiplier", 5f,
                 display_name: "KP Speed Multiplier",
-                description: "How many times faster knowledge points are generated (e.g. 5 = 5x faster). "
-                           + "/ Во сколько раз быстрее генерируются очки знаний (например, 5 = в 5 раз быстрее).");
+                description: CfgL10n.KpSpeed());
 
             _carryCapEntry = _cat.CreateEntry(
                 "Carry_Capacity_Multiplier", 3f,
                 display_name: "Villager Carry Capacity Multiplier",
-                description: "Multiplier on how much weight each villager can carry per trip (e.g. 3 = 3x more items). "
-                           + "/ Множитель переносимого веса для каждого жителя за поездку (например, 3 = в 3 раза больше предметов).");
+                description: CfgL10n.CarryCap());
 
             _workSpeedEntry = _cat.CreateEntry(
                 "Work_Speed_Per_Rank", 0.01f,
                 display_name: "Work Speed Bonus Per Rank (Production Management)",
-                description: "Bonus to all workers' speed per rank of Production Management purchased (0.01 = +1% per rank). "
-                           + "/ Бонус к скорости всех рабочих за каждый ранг 'Управления производством' (0.01 = +1% за ранг).");
+                description: CfgL10n.WorkSpeed());
 
             _resetEntry = _cat.CreateEntry(
                 "Reset_Tech_Tree", false,
                 display_name: "Reset Tech Tree",
-                description: "Set to true to refund ALL spent KP and reset ALL tech ranks on the next map load. "
-                           + "The flag is automatically cleared after applying. "
-                           + "/ Установите true для возврата всех потраченных ОЗ и сброса всех рангов технологий при следующей загрузке карты. Флаг очищается автоматически.");
+                description: CfgL10n.ResetTree());
 
             _allotEntry = _cat.CreateEntry(
                 "Allot_All_Techs", false,
                 display_name: "Allot All Techs",
-                description: "Set to true to instantly fill ALL tech ranks to their configured caps on the next map load (spends KP). "
-                           + "The setting stays enabled until you turn it off manually. "
-                           + "/ Установите true, чтобы при следующей загрузке карты все ранги технологий были выкуплены до максимума (тратит ОЗ). Настройка остаётся включённой, пока вы не выключите её вручную.");
+                description: CfgL10n.AllotAll());
 
             _deepWellsWaterEntry = _cat.CreateEntry(
                 "Deep_Wells_Water_Volume_Per_Rank", 50,
                 display_name: "Deep Wells — Bonus Water Volume Per Rank",
-                description: "Extra water capacity added to every well per rank of the 'Deep Wells' technology. "
-                           + "50 = +50 water per rank (e.g. rank 5 → +250 capacity). 0 = disabled. "
-                           + "Bonus is applied when the map loads; buy more ranks and reload to see the change. "
-                           + "/ Дополнительный объём воды в каждом колодце за каждый ранг технологии 'Глубокие колодцы'. "
-                           + "50 = +50 воды за ранг (например, 5 рангов → +250 ёмкости). 0 = отключено. "
-                           + "Бонус применяется при загрузке карты; купите ещё рангов и перезагрузите карту.");
+                description: CfgL10n.DeepWells());
 
             _kpHotkeyEntry = _cat.CreateEntry(
                 "KP_Hotkey", "F8",
                 display_name: "KP Hotkey",
-                description: "Press this key in-game to instantly add KP_Hotkey_Amount knowledge points. "
-                           + "Valid values: F1-F12, K, Insert, etc. (UnityEngine.KeyCode names). "
-                           + "/ Нажмите эту клавишу в игре для мгновенного добавления очков знаний. "
-                           + "Допустимые значения: F1-F12, K, Insert и т.д. (имена UnityEngine.KeyCode).");
+                description: CfgL10n.KpHotkey());
 
             _kpHotkeyAmountEntry = _cat.CreateEntry(
                 "KP_Hotkey_Amount", 1,
                 display_name: "KP Hotkey Amount",
-                description: "How many knowledge points to add per key press. "
-                           + "/ Сколько очков знаний добавлять за одно нажатие клавиши.");
+                description: CfgL10n.KpHotkeyAmount());
 
             _maxWaxEntry = _cat.CreateEntry(
                 "Max_Wax_Per_Barrel", 2,
                 display_name: "Max Wax Per Barrel (Wax-Sealed Barrels)",
-                description: "Maximum wax (ItemWax) consumed per barrel production. "
-                           + "1 = always 1 wax, 2 = capped at vanilla rank-1 value (default), 0 = removes wax from recipe entirely. "
-                           + "/ Максимум воска (ItemWax) на производство одной бочки. "
-                           + "1 = всегда 1 воск, 2 = не выше первого ранга ванили (по умолчанию), 0 = убрать воск из рецепта.");
+                description: CfgL10n.MaxWax());
 
             _livestockCapEntry = _cat.CreateEntry(
                 "Livestock_Capacity_Multiplier", 2f,
                 display_name: "Livestock Barn Capacity Multiplier [BETA]",
-                description: "Multiplier on the maximum number of animals in every barn type "
-                           + "(Barn, Stable, GoatBarn, ChickenCoop, Kennel). "
-                           + "2 = double capacity (e.g. Barn 7 -> 14), 1 = vanilla. "
-                           + "Change takes effect on next map load. "
-                           + "/ Множитель максимального числа животных во всех типах построек "
-                           + "(Амбар, Конюшня, Козлятник, Курятник, Псарня). "
-                           + "2 = двойная вместимость, 1 = ваниль. Вступает в силу при следующей загрузке карты.");
+                description: CfgL10n.LivestockCap());
 
             foreach (var kv in TechDefaults.DefaultRanks)
             {
@@ -1045,10 +1378,16 @@ namespace TechRankExpanderMod
 
                 var entry = _cat.CreateEntry(key, kv.Value,
                     display_name: kv.Key,
-                    description: $"Max ranks for \"{kv.Key}\" (original game value: 1-3). / Макс. рангов для \"{kv.Key}\" (значение в ванили: 1-3).");
+                    description: CfgL10n.RankEntry(kv.Key));
                 _rankEntries[kv.Key] = entry;
             }
 
+            // Remove stale cfg keys written by older mod versions for techs that are now
+            // unlock-only (hardcoded to 1). Leaving them causes player confusion — the value
+            // appears editable but is silently ignored.
+            PruneStaleConfigKeys();
+
+            RefreshDescriptions();
             _cat.SaveToFile();
             RefreshRuntimeConfig();
 
@@ -1070,6 +1409,22 @@ namespace TechRankExpanderMod
             // Hygiene: each rank is -25% disease probability; rank 4 = -100% (fully eliminated).
             // Rank 5+ would produce negative probability values, breaking disease mechanics.
             RuntimeConfig.ActiveRanks["Hygiene"] = 4;
+            // Unlock-only techs — these only unlock a building/resource/unit on rank 1.
+            // No repeatable bonus exists; extra ranks do nothing. Hardcoded so old cfg values
+            // (written by earlier mod versions with cap=20) cannot override this limit.
+            foreach (var unlockOnlyTech in new[] {
+                "Animal Husbandry", "Commerce Negotiations", "Coal-Fired Stoves",
+                "Intensive Animal Farming", "Conscription",
+                "Convenience Tax", "Prohibition", "Brigandine Armor", "Economic Power",
+                "Beacon of Culture", "Gates of Valor", "Guilds", "Pharmacy", "Citadels",
+                "Canning", "Caseiculture", "Trade Center", "Bookbinding", "Hospitalization",
+                "School of Thought", "Cavalry", "Reinforced Plating", "Tools of War",
+                "Grain Crops", "Arrow Loops", "Market Forces", "Nursing",
+                "Stone Battlements", "Battlement Fortifications", "Advanced Metal-Casting", "Forging",
+                "Quarry", "Brewing", "Barrel-Making", "Glass Blowing", "Arms Production",
+                "Smithing", "Paper Press", "Mining", "Blast Furnace", "Woodworking", "Forestry"
+            })
+                RuntimeConfig.ActiveRanks[unlockOnlyTech] = 1;
             // Favored Nation: each rank is -10% trading-post sell price; rank 10 = -100% = zero gold from bazaar.
             // Rank 11+ = negative prices (items have negative sell value), breaking trade entirely.
             if (_rankEntries.TryGetValue("Favored Nation", out var favoredNationEntry))
@@ -1077,17 +1432,18 @@ namespace TechRankExpanderMod
             else
                 RuntimeConfig.ActiveRanks["Favored Nation"] = 1;
             // Sustainable Farming: compound -25% fertility loss per rank.
-            // Rank 4 = 0% loss (farms never deplete — sustainable but not generative).
+            // Rank 3 = -75% loss (safe). Rank 4 = 0% loss (farms never deplete — edge case).
             // Rank 5+ = negative multiplier → fertility RESTORES over time (infinite fertility, broken).
+            // Hard max = 3 to keep meaningful fertility loss and avoid rank-4 edge case.
             if (_rankEntries.TryGetValue("Sustainable Farming", out var sfEntry))
             {
-                int sfClamped = Mathf.Clamp(sfEntry.Value, 1, 4);
+                int sfClamped = Mathf.Clamp(sfEntry.Value, 1, 3);
                 if (sfClamped != sfEntry.Value)
-                    MelonLogger.Warning($"[TechRankExpander] Sustainable Farming rank clamped {sfEntry.Value} → {sfClamped} (rank 5+ reverses fertility loss).");
+                    MelonLogger.Warning($"[TechRankExpander] Sustainable Farming rank clamped {sfEntry.Value} → {sfClamped} (rank 4+ eliminates or reverses fertility loss).");
                 RuntimeConfig.ActiveRanks["Sustainable Farming"] = sfClamped;
             }
             else
-                RuntimeConfig.ActiveRanks["Sustainable Farming"] = 4;
+                RuntimeConfig.ActiveRanks["Sustainable Farming"] = 3;
 
             RuntimeConfig.KpSpeedMultiplier      = _kpSpeedEntry.Value;
             RuntimeConfig.CarryCapacityMultiplier = _carryCapEntry.Value;
@@ -1108,6 +1464,34 @@ namespace TechRankExpanderMod
             RuntimeConfig.LivestockCapacityMultiplier = Mathf.Max(1f, _livestockCapEntry?.Value ?? 2f);
         }
 
+        private string _lastDescriptionLanguage = null;
+
+        // Updates cfg entry descriptions to the current game language and saves.
+        // Skips the update if the language hasn't changed since the last call.
+        internal void RefreshDescriptions()
+        {
+            string lang = I2.Loc.LocalizationManager.CurrentLanguage;
+            if (string.IsNullOrEmpty(lang))
+                lang = UnityEngine.PlayerPrefs.GetString("currentLanguage", "English");
+            if (lang == _lastDescriptionLanguage) return;
+            _lastDescriptionLanguage = lang;
+
+            _kpSpeedEntry.Description        = CfgL10n.KpSpeed();
+            _carryCapEntry.Description       = CfgL10n.CarryCap();
+            _workSpeedEntry.Description      = CfgL10n.WorkSpeed();
+            _resetEntry.Description          = CfgL10n.ResetTree();
+            _allotEntry.Description          = CfgL10n.AllotAll();
+            _deepWellsWaterEntry.Description = CfgL10n.DeepWells();
+            _kpHotkeyEntry.Description       = CfgL10n.KpHotkey();
+            _kpHotkeyAmountEntry.Description = CfgL10n.KpHotkeyAmount();
+            _maxWaxEntry.Description         = CfgL10n.MaxWax();
+            if (_livestockCapEntry != null)
+                _livestockCapEntry.Description = CfgL10n.LivestockCap();
+            foreach (var kv in _rankEntries)
+                kv.Value.Description = CfgL10n.RankEntry(kv.Key);
+            _cat.SaveToFile();
+        }
+
         // Called from Patch_TechTreeManager_Load after the reset completes,
         // so the flag is cleared in the config file automatically.
         internal void ClearResetFlag()
@@ -1125,6 +1509,48 @@ namespace TechRankExpanderMod
             _allotEntry.Value = false;
             _cat.SaveToFile();
             MelonLogger.Msg("[TechRankExpander] Allot_All_Techs flag cleared in config.");
+        }
+
+        // Removes cfg entries that exist on disk but are no longer valid (unlock-only techs
+        // moved to hardcoded = 1, or techs removed in a game update). Without pruning, old
+        // entries sit in the file with user-set values that look editable but are ignored.
+        private void PruneStaleConfigKeys()
+        {
+            // Build set of valid keys: all _rankEntries keys converted to cfg key format
+            var validKeys = new System.Collections.Generic.HashSet<string>();
+            foreach (var k in _rankEntries.Keys)
+            {
+                validKeys.Add("Ranks_" + k
+                    .Replace(" ", "_")
+                    .Replace(":", "")
+                    .Replace("-", "_")
+                    .Replace("'", ""));
+            }
+
+            // Also keep the non-rank entries
+            validKeys.Add("KP_Speed_Multiplier");
+            validKeys.Add("Carry_Capacity_Multiplier");
+            validKeys.Add("Work_Speed_Per_Rank");
+            validKeys.Add("Reset_Tech_Tree");
+            validKeys.Add("Allot_All_Techs");
+            validKeys.Add("Deep_Wells_Water_Volume_Per_Rank");
+            validKeys.Add("KP_Hotkey");
+            validKeys.Add("KP_Hotkey_Amount");
+            validKeys.Add("Max_Wax_Per_Barrel");
+            validKeys.Add("Livestock_Capacity_Multiplier");
+
+            var toRemove = new System.Collections.Generic.List<MelonPreferences_Entry>();
+            foreach (var entry in _cat.Entries)
+            {
+                if (!validKeys.Contains(entry.Identifier))
+                    toRemove.Add(entry);
+            }
+
+            foreach (var entry in toRemove)
+            {
+                _cat.DeleteEntry(entry.Identifier);
+                MelonLogger.Msg($"[TechRankExpander] Pruned stale cfg key: {entry.Identifier}");
+            }
         }
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
@@ -1159,6 +1585,20 @@ namespace TechRankExpanderMod
                 WorkSpeedHelper.ApplyWorkSpeed(gm.techTreeManager);
             // Re-activate all tech buildings after full scene load (buildManager is now ready)
             TechBuildingHelper.ActivateTechBuildings();
+        }
+    }
+
+    // ── Patch: language change → refresh cfg descriptions ────────────────────
+    // The UI calls I2.Loc.LocalizationManager.CurrentLanguage = toggle.name directly.
+    // Hook the I2Loc setter so cfg descriptions update immediately when the player
+    // switches language in the options menu, without requiring a restart.
+    [HarmonyPatch(typeof(I2.Loc.LocalizationManager), "set_CurrentLanguage")]
+    internal static class Patch_LanguageChanged
+    {
+        static void Postfix()
+        {
+            TechRankExpander.Instance?.RefreshDescriptions();
+            MelonLogger.Msg($"[TechRankExpander] Language changed → cfg descriptions updated ({I2.Loc.LocalizationManager.CurrentLanguage}).");
         }
     }
 }
