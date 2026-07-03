@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.1.9", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.0", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -110,8 +110,7 @@ namespace TechRankExpanderMod
             { "Iron Shares",                     20 },
             { "Border Policies",                 20 },
             { "Heat-Treated Halberds",           20 },
-            { "Forging",                         20 },  // +tool/heavy tool health per rank — NOT unlock-only
-            { "Advanced Metal-Casting",          20 },  // +tool/heavy tool health per rank — NOT unlock-only
+            { "Forging",                         20 },  // reported to have repeatable tool health bonus per rank
             // "Sheet Composting" hardcoded to 3 — NOT configurable.
             // "Blast Furnace" — unlock-only (upgrades Foundry to Smelter), hardcoded to 1 below
             // "Woodworking"   — unlock-only (upgrades Woodcutter Yard + Sawpit), hardcoded to 1 below
@@ -1420,7 +1419,7 @@ namespace TechRankExpanderMod
                 "Canning", "Caseiculture", "Trade Center", "Bookbinding", "Hospitalization",
                 "School of Thought", "Cavalry", "Reinforced Plating", "Tools of War",
                 "Grain Crops", "Arrow Loops", "Market Forces", "Nursing",
-                "Stone Battlements", "Battlement Fortifications",
+                "Stone Battlements", "Battlement Fortifications", "Advanced Metal-Casting",
                 "Quarry", "Brewing", "Barrel-Making", "Glass Blowing", "Arms Production",
                 "Smithing", "Paper Press", "Mining", "Blast Furnace", "Woodworking", "Forestry"
             })
