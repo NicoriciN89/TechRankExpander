@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.0", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.1", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -112,20 +112,8 @@ namespace TechRankExpanderMod
             { "Heat-Treated Halberds",           20 },
             { "Forging",                         20 },  // reported to have repeatable tool health bonus per rank
             // "Sheet Composting" hardcoded to 3 — NOT configurable.
-            // "Blast Furnace" — unlock-only (upgrades Foundry to Smelter), hardcoded to 1 below
-            // "Woodworking"   — unlock-only (upgrades Woodcutter Yard + Sawpit), hardcoded to 1 below
-            // "Quarry"        — unlock-only (opens Quarry building), hardcoded to 1 below
-            // "Brewing"       — unlock-only (opens Brewery), hardcoded to 1 below
-            // "Barrel-Making" — unlock-only (opens Cooper), hardcoded to 1 below
-            // "Glass Blowing" — unlock-only (opens Glassmaker), hardcoded to 1 below
-            // "Arms Production" — unlock-only (opens Armory), hardcoded to 1 below
-            // "Smithing"      — unlock-only (opens Blacksmith Forge), hardcoded to 1 below
-            // "Paper Press"   — unlock-only (opens Paper Mill), hardcoded to 1 below
-            // "Mining"        — unlock-only (opens Mines), hardcoded to 1 below
-            // "Forestry" — unlock-only (upgrades Worker Camp to Forester Camp), hardcoded to 1 below
-
-            // Unlock-only techs (cap = 1) are NOT listed here — they are hardcoded
-            // in RefreshRuntimeConfig() to prevent old cfg values from overriding them.
+            // Unlock-only techs (open a building, no repeatable bonus) are NOT listed here.
+            // Mod leaves their vanilla numRanks completely untouched.
         };
     }
 
@@ -1409,21 +1397,7 @@ namespace TechRankExpanderMod
             // Rank 5+ would produce negative probability values, breaking disease mechanics.
             RuntimeConfig.ActiveRanks["Hygiene"] = 4;
             // Unlock-only techs — these only unlock a building/resource/unit on rank 1.
-            // No repeatable bonus exists; extra ranks do nothing. Hardcoded so old cfg values
-            // (written by earlier mod versions with cap=20) cannot override this limit.
-            foreach (var unlockOnlyTech in new[] {
-                "Animal Husbandry", "Commerce Negotiations", "Coal-Fired Stoves",
-                "Intensive Animal Farming", "Conscription",
-                "Convenience Tax", "Prohibition", "Brigandine Armor", "Economic Power",
-                "Beacon of Culture", "Gates of Valor", "Guilds", "Pharmacy", "Citadels",
-                "Canning", "Caseiculture", "Trade Center", "Bookbinding", "Hospitalization",
-                "School of Thought", "Cavalry", "Reinforced Plating", "Tools of War",
-                "Grain Crops", "Arrow Loops", "Market Forces", "Nursing",
-                "Stone Battlements", "Battlement Fortifications", "Advanced Metal-Casting",
-                "Quarry", "Brewing", "Barrel-Making", "Glass Blowing", "Arms Production",
-                "Smithing", "Paper Press", "Mining", "Blast Furnace", "Woodworking", "Forestry"
-            })
-                RuntimeConfig.ActiveRanks[unlockOnlyTech] = 1;
+            // Unlock-only techs are NOT added to ActiveRanks — mod leaves their vanilla numRanks untouched.
             // Favored Nation: each rank is -10% trading-post sell price; rank 10 = -100% = zero gold from bazaar.
             // Rank 11+ = negative prices (items have negative sell value), breaking trade entirely.
             if (_rankEntries.TryGetValue("Favored Nation", out var favoredNationEntry))
