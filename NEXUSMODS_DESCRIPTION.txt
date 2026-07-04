@@ -1,7 +1,7 @@
 ================================================================
-  TechRankExpander  v2.0.2
-  Author : Modder
-  Game   : Farthest Frontier v1.9.4 (Mono / MelonLoader)
+  TechRankExpander  v2.2.2
+  Author : NicoriciN
+  Game   : Farthest Frontier v1.1.2a (Mono / MelonLoader)
 ================================================================
 
 NEXUSMODS PAGE TITLE
@@ -25,17 +25,20 @@ TechRankExpander expands the tech tree beyond the vanilla rank limits and gives 
 [list]
 [*]Most technologies can be researched up to [b]20 ranks[/b] instead of the vanilla 1–3.
 [*]Knowledge Point generation can be sped up with a configurable multiplier.
-[*]Villager carry capacity and the Production Management work-speed bonus are configurable.
+[*]Villager carry capacity, livestock barn capacity, and the Production Management work-speed bonus are configurable.
 [*]Prerequisites unlock at rank 1 instead of requiring full research.
 [*]Tech-linked buildings unlock at rank 1.
 [*]Deep Wells gains a configurable water bonus per rank, with tooltip support in multiple UI languages.
 [*]Reset Tech Tree and Allot All Techs can be applied on load.
+[*]Unlock-only technologies (those that only open a building) keep their vanilla rank cap of 1.
+[*]Safe caps enforced automatically — no broken work times, no infinite fertility, no negative trade prices.
 [/list]
 
 [size=4][b]Default settings[/b][/size]
 [list]
 [*]KP speed multiplier: [b]5x[/b]
 [*]Carry capacity multiplier: [b]3x[/b]
+[*]Livestock barn capacity multiplier: [b]2x[/b]
 [*]Work-speed bonus: [b]+1% per Production Management rank[/b]
 [*]Deep Wells water volume per rank: [b]+50[/b]
 [*]Reset Tech Tree: [b]off[/b]
@@ -89,7 +92,8 @@ KP_Hotkey = F8
 KP_Hotkey_Amount = 1
 
 Ranks_Favored_Nation = 1       # hard clamped to max 9 in code
-Ranks_Sustainable_Farming = 4  # hard clamped to max 4 in code
+Ranks_Sustainable_Farming = 3  # hard clamped to max 3 in code
+Ranks_Horse_Armor = 6          # −15% cavalry speed/rank; game blocks >100% penalty
 Ranks_Steel_Tools = 9
 Ranks_Masonry = 15             # compound reduction — safe up to ~20
 Ranks_Stonecutting = 4
@@ -101,7 +105,7 @@ Ranks_Stonecutting = 4
 
 [size=4][b]Requirements[/b][/size]
 [list]
-[*]Farthest Frontier v1.1.0
+[*]Farthest Frontier v1.1.2a
 [*][url=https://melonwiki.xyz/]MelonLoader[/url] 0.6.x or newer — Mono build
 [/list]
 
