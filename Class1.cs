@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.1", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.2", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -79,7 +79,7 @@ namespace TechRankExpanderMod
             { "Variolation",                     20 },
             { "Masonry",                         15 },  // compound −25% bricks/rank (current qty); stabilises at 1–2 bricks
             // "Civic Inspections" hardcoded to 3 — NOT configurable.
-            { "Horse Armor",                     20 },  // display name "Horse Barding"; GetTechName() returns "Horse Armor"
+            { "Horse Armor",                      6 },  // display name "Horse Barding"; −15% speed/rank via GE_MountedSoldierModify(Speed, −0.15); game clamps penalty to <100% so no crash, but rank 7+ (≥105%) is silently rejected — cap 6 = −90% speed (near-stationary); +30% health/rank (MaxLife) is uncapped and safe
             { "Wheel-Lock Crossbow",             20 },
             { "Printing Press",                   1 },  // −50% work/rank; rank 2 = instant; cap keeps 50% work time
             { "Fire Assaying",                   20 },
@@ -110,7 +110,6 @@ namespace TechRankExpanderMod
             { "Iron Shares",                     20 },
             { "Border Policies",                 20 },
             { "Heat-Treated Halberds",           20 },
-            { "Forging",                         20 },  // reported to have repeatable tool health bonus per rank
             // "Sheet Composting" hardcoded to 3 — NOT configurable.
             // Unlock-only techs (open a building, no repeatable bonus) are NOT listed here.
             // Mod leaves their vanilla numRanks completely untouched.
@@ -768,6 +767,8 @@ namespace TechRankExpanderMod
             MelonLogger.Msg($"[TechRankExpander] numRanks written on {count} tech nodes; cache built ({TechCache.ById.Count} entries).");
             if (missedActiveRanks.Count > 0)
                 MelonLogger.Warning($"[TechRankExpander] {missedActiveRanks.Count} ActiveRanks keys had no matching tech: {string.Join(", ", missedActiveRanks)}");
+
+
         }
     }
     // ──────────────────────────────────────────────────────────────────────────

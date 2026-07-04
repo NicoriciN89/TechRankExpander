@@ -55,11 +55,12 @@ Some technologies use percentage-based effects that break if their rank cap is r
 [b]Configurable with runtime clamp:[/b]
 [list]
 [*][b]Favored Nation[/b] — default 1, hard max 9 (rank 10 = 0 gold from bazaar; rank 11+ = negative prices)
-[*][b]Sustainable Farming[/b] — default 4, hard max 4 (rank 5+ reverses fertility loss → farms restore fertility indefinitely)
+[*][b]Sustainable Farming[/b] — default 3, hard max 3 (rank 4 = 0% fertility loss; rank 5+ reverses fertility → farms restore indefinitely)
 [/list]
 
 [b]Configurable (no hard clamp, safe by default):[/b]
 [list]
+[*][b]Horse Barding[/b] — cap 6 (−15% cavalry speed/rank; game clamps penalty to <100% so rank 7+ is silently ignored — horses never freeze; +30% health/rank is uncapped)
 [*]Steel Tools, Military Logistics, Production Logistics, Metallurgy — cap 9 (−10%/rank; rank 10 = instant craft)
 [*]Venting Chambers — cap 6 (−15%/rank; rank 7 = instant craft)
 [*]Spring Pole Lathe, Stiff-Blade Saw, Stonecutting — cap 4 (−20%/rank; rank 5 = instant)
@@ -96,6 +97,8 @@ Ranks_Stonecutting = 4
 
 [b]Allot_All_Techs[/b] fills each tech to its configured cap on every load until you turn it off manually. [b]Reset_Tech_Tree[/b] still works as a one-time load option.
 
+[b]Note on language:[/b] mod tooltips and config descriptions are shown in the game's current UI language. If you change the language in the game settings, [b]restart the game[/b] for the mod text to update.
+
 [size=4][b]Requirements[/b][/size]
 [list]
 [*]Farthest Frontier v1.1.0
@@ -122,7 +125,7 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   FILE TO UPLOAD ON NEXUSMODS
 ================================================================
-  TechRankExpander_v2.0.2.zip
+  TechRankExpander_v2.2.2.zip
 
   ZIP structure (drop-into-game-folder install):
     Mods/TechRankExpander.dll
@@ -130,7 +133,22 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   NEXUSMODS CHANGELOG (paste into the "Change log" field)
 ================================================================
-v2.0.2 — Fix unlock-only tech cap bypass via cfg
+v2.2.2 — Forging fix + Horse Barding safe cap
+
+Forging ("Unlock Foundry") is now treated as an unlock-only technology
+and removed from the rank expansion list. It previously appeared as
+0/20 in the tech tree despite having no repeatable per-rank bonus.
+Old Ranks_Forging entries in existing cfg files are removed automatically
+on first load.
+
+Horse Barding cap lowered from 20 to 6. Each rank applies −15% cavalry
+speed via GE_MountedSoldierModify. The game internally clamps the total
+movement penalty to <100%, so ranks 7–20 were silently ignored and wasted
+research points. Cap 6 = −90% speed (near-stationary cavalry, maximum
+meaningful effect). The +30% health per rank has no upper limit and
+continues to apply at any cap setting.
+
+v2.2.1 — Fix unlock-only tech cap bypass via cfg
 
 Unlock-only technologies (those that only unlock a building, resource,
 or unit at rank 1 with no repeatable bonus) are now hardcoded to cap=1
@@ -200,7 +218,7 @@ v1.9.1 — Bug fixes
 ================================================================
   Category  : Gameplay
   Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
-  Version   : 2.0.2
-  Game ver. : 1.9.4
+  Version   : 2.2.2
+  Game ver. : 1.1.2a
   Requires  : MelonLoader
 ================================================================

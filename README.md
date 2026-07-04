@@ -61,6 +61,7 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 | Technology | Default cap | Effect per rank | Notes |
 |:-----------|:-----------:|:----------------|:------|
 | Favored Nation | 1 | −10 % bazaar sell price | Hard clamped to max 9 — rank 10 = zero gold, rank 11+ = negative prices |
+| Horse Barding | 6 | −15 % cavalry speed | Game clamps penalty to <100 % (rank 7+ silently rejected); cap 6 = −90 % speed; +30 % health/rank is uncapped and safe |
 | Steel Tools | 9 | −10 % crafting time | Rank 10 = instant craft (game clamps to 0); cap keeps ≥10 % time |
 | Military Logistics | 9 | −10 % crafting time | Same as above |
 | Production Logistics | 9 | −10 % crafting time | Same as above |
@@ -77,6 +78,8 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 > **Work-time reductions** (Steel Tools, Military Logistics, etc.) use `GE_ManufacturingWorkModify`. The game applies `Mathf.Max(0, …)` internally, so work time reaches 0 (instant) rather than going negative. The caps above prevent instant crafting, which can overwhelm the task queue.
 >
 > **Masonry** uses `GE_BuildingMaterialsQtyModify` with a *compound* formula — each rank reduces the **current** brick count by 25 %, not the original. Previous documentation incorrectly described this as linear. The game also clamps brick cost to 0, so no rank can produce negative costs.
+>
+> **Horse Barding** uses `GE_MountedSoldierModify(Speed, −0.15)`. The game's `AddMovementPenalty` clamps the total penalty to <1.0 (100 %), so rank 7+ is silently ignored — horses never freeze or move backwards. Cap 6 is set to avoid wasting research points on no-effect ranks.
 >
 > **Sustainable Farming** and **Favored Nation** are the only configurable techs with hard runtime clamps. Exceeding their safe maximum breaks core game mechanics (infinite fertility / negative trade prices).
 
