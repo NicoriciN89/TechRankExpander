@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.2", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.3", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -110,6 +110,7 @@ namespace TechRankExpanderMod
             { "Iron Shares",                     20 },
             { "Border Policies",                 20 },
             { "Heat-Treated Halberds",           20 },
+            { "Advanced Metal-Casting",          20 },  // GE_HeavyToolBonusModify — +tool/heavy tool health per rank; no inversion; safe to 20
             // "Sheet Composting" hardcoded to 3 — NOT configurable.
             // Unlock-only techs (open a building, no repeatable bonus) are NOT listed here.
             // Mod leaves their vanilla numRanks completely untouched.
