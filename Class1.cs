@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.3", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.4", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -73,10 +73,10 @@ namespace TechRankExpanderMod
             { "Production Management",           20 },
             { "Marksman Training",               20 },
             { "Rehabilitation",                  20 },
-            { "Pharmaceutical Study",            20 },
+            // Pharmaceutical Study: −50% work/rank; rank 2 = instant craft — NOT listed, vanilla cap kept.
             { "Favored Nation",                   1 },  // −10% sell price/rank; rank 10 = 0 gold; rank 11+ = negative prices → clamped to max 9
             { "Steel Tools",                      9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
-            { "Variolation",                     20 },
+            // Variolation: −50% smallpox/rank; rank 2 = −100% (no further effect) — NOT listed, vanilla cap kept.
             { "Masonry",                         15 },  // compound −25% bricks/rank (current qty); stabilises at 1–2 bricks
             // "Civic Inspections" hardcoded to 3 — NOT configurable.
             { "Horse Armor",                      6 },  // display name "Horse Barding"; −15% speed/rank via GE_MountedSoldierModify(Speed, −0.15); game clamps penalty to <100% so no crash, but rank 7+ (≥105%) is silently rejected — cap 6 = −90% speed (near-stationary); +30% health/rank (MaxLife) is uncapped and safe

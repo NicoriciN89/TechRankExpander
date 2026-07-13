@@ -1,5 +1,5 @@
 ================================================================
-  TechRankExpander  v2.2.2
+  TechRankExpander  v2.2.4
   Author : NicoriciN
   Game   : Farthest Frontier v1.1.2a (Mono / MelonLoader)
 ================================================================
@@ -53,6 +53,8 @@ Some technologies use percentage-based effects that break if their rank cap is r
 [*][b]Civic Inspections[/b] — cap 3 (rank 4+ gives negative firefighter work time → workers freeze)
 [*][b]Sheet Composting[/b] — cap 3 (rank 4+ gives negative compost work time → Compost Yard breaks)
 [*][b]Hygiene[/b] — cap 4 (game uses Clamp01 internally; rank 5+ is redundant)
+[*][b]Variolation[/b] — vanilla cap 1 kept (rank 2 = −100% smallpox; no further effect possible — not listed in cfg)
+[*][b]Pharmaceutical Study[/b] — vanilla cap 1 kept (rank 2 = instant craft / 0 work time — not listed in cfg)
 [/list]
 
 [b]Configurable with runtime clamp:[/b]
@@ -101,7 +103,7 @@ Ranks_Stonecutting = 4
 
 [b]Allot_All_Techs[/b] fills each tech to its configured cap on every load until you turn it off manually. [b]Reset_Tech_Tree[/b] still works as a one-time load option.
 
-[b]Note on language:[/b] mod tooltips and config descriptions are shown in the game's current UI language. If you change the language in the game settings, [b]restart the game[/b] for the mod text to update.
+[b]Note on language:[/b] mod tooltips and config file descriptions are shown in the game's current UI language. If you change the language in the game settings, [b]restart the game[/b] for the mod text and config descriptions to update.
 
 [size=4][b]Requirements[/b][/size]
 [list]
@@ -129,7 +131,7 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   FILE TO UPLOAD ON NEXUSMODS
 ================================================================
-  TechRankExpander_v2.2.2.zip
+  TechRankExpander_v2.2.4.zip
 
   ZIP structure (drop-into-game-folder install):
     Mods/TechRankExpander.dll
@@ -137,6 +139,34 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   NEXUSMODS CHANGELOG (paste into the "Change log" field)
 ================================================================
+v2.2.4 — Variolation and Pharmaceutical Study removed from cfg
+
+Variolation and Pharmaceutical Study are no longer listed in the config
+file and their vanilla rank caps are left untouched.
+
+Variolation: each rank reduces smallpox chance by 50%. Rank 2 already
+eliminates smallpox entirely (−100%) — no further effect is possible
+beyond rank 1. Offering ranks 2–20 in the config was misleading.
+
+Pharmaceutical Study: each rank reduces medicine work time by 50% and
+increases shelf life by 100%. Rank 2 = instant craft (0 work time) —
+raising it further has no additional effect. Cap kept at vanilla.
+
+Existing cfg files are cleaned up automatically on first load — the
+Ranks_Variolation and Ranks_Pharmaceutical_Study keys are removed.
+
+Marksman Training investigated: uses GE_BuildingAttackSpeedModify (tag-
+based system), not a shared ranged-weapon ScriptableObject. The attack
+speed bonus applying to bandit lookout towers is vanilla game behaviour,
+not a mod side-effect. Cap remains 20.
+
+v2.2.3 — Advanced Metal-Casting restored
+
+Advanced Metal-Casting was incorrectly classified as unlock-only in
+v2.2.1 and removed from the rank list. It actually uses
+GE_HeavyToolBonusModify (+tool and heavy tool health per rank) which is
+a repeatable per-rank bonus. Restored with cap 20.
+
 v2.2.2 — Forging fix + Horse Barding safe cap
 
 Forging ("Unlock Foundry") is now treated as an unlock-only technology
@@ -222,7 +252,7 @@ v1.9.1 — Bug fixes
 ================================================================
   Category  : Gameplay
   Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
-  Version   : 2.2.2
+  Version   : 2.2.4
   Game ver. : 1.1.2a
   Requires  : MelonLoader
 ================================================================

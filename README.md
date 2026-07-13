@@ -73,6 +73,8 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 | Adjustable Shoe Lasts | 3 | −25 % crafting time | Rank 4 = instant; cap keeps ≥25 % time |
 | Masonry | 15 | compound −25 % brick cost | **Compound** reduction per rank (not linear); stabilises at 1–2 bricks; game clamps to 0 |
 | Sustainable Farming | 3 | compound −25 % fertility loss | Hard clamped to max 3 — rank 4 = 0 % loss (edge); rank 5+ = fertility restores (infinite fertility) |
+| Pharmaceutical Study | 1 (vanilla) | −50 % work / +100 % shelf life | Rank 2 = instant craft (0 work time); vanilla cap kept — not configurable |
+| Variolation | 1 (vanilla) | −50 % smallpox chance | Rank 2 = −100 % (no smallpox at all); no further effect exists; vanilla cap kept |
 | Printing Press | 1 | −50 % crafting time | Rank 2 = instant; cap keeps 50 % time |
 
 > **Work-time reductions** (Steel Tools, Military Logistics, etc.) use `GE_ManufacturingWorkModify`. The game applies `Mathf.Max(0, …)` internally, so work time reaches 0 (instant) rather than going negative. The caps above prevent instant crafting, which can overwhelm the task queue.
