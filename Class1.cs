@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.5", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.6", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -40,7 +40,7 @@ namespace TechRankExpanderMod
             { "Command Structure",               20 },
             { "Taxation",                        20 },
             { "Alcohol Sterilization",           20 },
-            { "Military Logistics",               9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
+            { "Military Logistics",              20 },  // GE_ExpenseTypeAmountModify — reduces military upkeep cost; no work-time risk; safe to 20
             { "Scientific Discovery",            20 },
             { "Sustainable Forestry",            20 },
             { "Selective Breeding: Grains",      20 },
@@ -75,7 +75,7 @@ namespace TechRankExpanderMod
             { "Rehabilitation",                  20 },
             // Pharmaceutical Study: −50% work/rank; rank 2 = instant craft — NOT listed, vanilla cap kept.
             { "Favored Nation",                   1 },  // −10% sell price/rank; rank 10 = 0 gold; rank 11+ = negative prices → clamped to max 9
-            { "Steel Tools",                      9 },  // −10% work/rank; rank 10 = instant; cap keeps ≥10% work time
+            { "Steel Tools",                      9 },  // GE_ManufacturingWorkModify on Firewood only; −10%/rank; rank 10 = instant chop; cap keeps ≥10% work time
             // Variolation: −50% smallpox/rank; rank 2 = −100% (no further effect) — NOT listed, vanilla cap kept.
             { "Masonry",                         15 },  // compound −25% bricks/rank (current qty); stabilises at 1–2 bricks
             // "Civic Inspections" hardcoded to 3 — NOT configurable.

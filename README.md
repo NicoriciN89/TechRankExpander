@@ -62,10 +62,10 @@ Some techs reduce crafting time, costs, or probabilities by a fixed percentage p
 |:-----------|:-----------:|:----------------|:------|
 | Favored Nation | 1 | −10 % bazaar sell price | Hard clamped to max 9 — rank 10 = zero gold, rank 11+ = negative prices |
 | Horse Barding | 6 | −15 % cavalry speed | Game clamps penalty to <100 % (rank 7+ silently rejected); cap 6 = −90 % speed; +30 % health/rank is uncapped and safe |
-| Steel Tools | 9 | −10 % crafting time | Rank 10 = instant craft (game clamps to 0); cap keeps ≥10 % time |
-| Military Logistics | 9 | −10 % crafting time | Same as above |
-| Production Logistics | 9 | −10 % crafting time | Same as above |
-| Metallurgy | 9 | −10 % crafting time | Same as above |
+| Steel Tools | 9 | −10 % firewood work time | Rank 10 = instant chop; cap keeps ≥10 % time |
+| Military Logistics | 20 | −10 % military upkeep cost | Uses `GE_ExpenseTypeAmountModify` — reduces upkeep cost, not work time; no instant-craft risk; safe to 20 |
+| Production Logistics | 9 | −10 % crafting time | Rank 10 = instant craft; cap keeps ≥10 % time |
+| Metallurgy | 9 | −10 % smelting time | Rank 10 = instant smelt; cap keeps ≥10 % time |
 | Venting Chambers | 6 | −15 % crafting time | Rank 7 = instant; cap keeps ≥10 % time |
 | Spring Pole Lathe | 4 | −20 % crafting time | Rank 5 = instant; cap keeps ≥20 % time |
 | Stiff-Blade Saw | 4 | −20 % crafting time | Rank 5 = instant; cap keeps ≥20 % time |

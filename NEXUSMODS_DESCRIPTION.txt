@@ -1,5 +1,5 @@
 ================================================================
-  TechRankExpander  v2.2.5
+  TechRankExpander  v2.2.6
   Author : NicoriciN
   Game   : Farthest Frontier v1.1.2a (Mono / MelonLoader)
 ================================================================
@@ -66,7 +66,8 @@ Some technologies use percentage-based effects that break if their rank cap is r
 [b]Configurable (no hard clamp, safe by default):[/b]
 [list]
 [*][b]Horse Barding[/b] — cap 6 (−15% cavalry speed/rank; game clamps penalty to <100% so rank 7+ is silently ignored — horses never freeze; +30% health/rank is uncapped)
-[*]Steel Tools, Military Logistics, Production Logistics, Metallurgy — cap 9 (−10%/rank; rank 10 = instant craft)
+[*]Steel Tools, Production Logistics, Metallurgy — cap 9 (−10% work time/rank on specific items; rank 10 = instant craft)
+[*]Military Logistics — cap 20 (uses GE_ExpenseTypeAmountModify — reduces military upkeep cost, not work time; no instant-craft risk)
 [*]Venting Chambers — cap 6 (−15%/rank; rank 7 = instant craft)
 [*]Spring Pole Lathe, Stiff-Blade Saw, Stonecutting — cap 4 (−20%/rank; rank 5 = instant)
 [*]Adjustable Shoe Lasts — cap 3 (−25%/rank; rank 4 = instant craft)
@@ -131,7 +132,7 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   FILE TO UPLOAD ON NEXUSMODS
 ================================================================
-  TechRankExpander_v2.2.5.zip
+  TechRankExpander_v2.2.6.zip
 
   ZIP structure (drop-into-game-folder install):
     Mods/TechRankExpander.dll
@@ -139,6 +140,15 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   NEXUSMODS CHANGELOG (paste into the "Change log" field)
 ================================================================
+v2.2.6 — Military Logistics cap corrected to 20
+
+Diagnostic log showed Military Logistics uses GE_ExpenseTypeAmountModify
+(reduces military upkeep cost) — not GE_ManufacturingWorkModify. There
+is no work-time risk, so the cap 9 restriction was wrong. Raised to 20.
+
+Steel Tools confirmed to affect Firewood only (ManufactureFirewood +
+ManufactureFirewood 2). Cap 9 is correct and unchanged.
+
 v2.2.5 — Bug fixes: well bonus deduplication, dead code removal
 
 Fixed: Deep Wells water bonus could be applied more than once to the
@@ -264,7 +274,7 @@ v1.9.1 — Bug fixes
 ================================================================
   Category  : Gameplay
   Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
-  Version   : 2.2.5
+  Version   : 2.2.6
   Game ver. : 1.1.2a
   Requires  : MelonLoader
 ================================================================
