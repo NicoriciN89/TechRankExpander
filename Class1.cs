@@ -4,7 +4,7 @@ using I2.Loc;
 using MelonLoader;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.4", "NicoriciN")]
+[assembly: MelonInfo(typeof(TechRankExpanderMod.TechRankExpander), "TechRankExpander", "2.2.5", "NicoriciN")]
 [assembly: MelonGame("Crate Entertainment", "Farthest Frontier")]
 
 namespace TechRankExpanderMod
@@ -69,7 +69,7 @@ namespace TechRankExpanderMod
 
             // ── Vanilla 1-rank techs with scaleable % effect → expanded ──────
             // These apply a repeatable bonus per rank; safe caps where needed.
-            { "Sustainable Farming",              3 },  // compound −25% fertility loss/rank; rank 3 = 25% loss (safe margin); rank 4 = 0% loss (edge); rank 5+ = fertility restored → clamped to 3
+            { "Sustainable Farming",              3 },  // compound −25% fertility loss/rank; rank 3 = 25% loss (safe); rank 4+ forbidden — clamped to 3 in RefreshRuntimeConfig
             { "Production Management",           20 },
             { "Marksman Training",               20 },
             { "Rehabilitation",                  20 },
@@ -266,10 +266,16 @@ namespace TechRankExpanderMod
     // The well's storage cap is governed solely by `maxWater`, so existing wells
     // will gradually fill to the new maximum over time.  New wells start at the
     // initial water value and fill up from there.
+    // _patchedWells tracks which Well instances already received the bonus so that
+    // Start() being called more than once on the same object doesn't double-apply it.
     [HarmonyPatch(typeof(Well), "Start")]
     internal static class Patch_WellStart
     {
         private static System.Reflection.FieldInfo _maxWaterField;
+        private static readonly System.Collections.Generic.HashSet<int> _patchedWells =
+            new System.Collections.Generic.HashSet<int>();
+
+        internal static void ClearCache() => _patchedWells.Clear();
 
         static void Postfix(Well __instance)
         {
@@ -277,6 +283,10 @@ namespace TechRankExpanderMod
             if (bonus <= 0) return;
 
             if (!TechCache.ByName.TryGetValue("Deep Wells", out var tech) || tech.curRank <= 0) return;
+
+            int wellId = __instance.GetInstanceID();
+            if (_patchedWells.Contains(wellId)) return;
+            _patchedWells.Add(wellId);
 
             if (_maxWaterField == null)
                 _maxWaterField = typeof(Well).GetField(
@@ -470,16 +480,6 @@ namespace TechRankExpanderMod
         }
     }
     // ──────────────────────────────────────────────────────────────────────────
-
-    [HarmonyPatch(typeof(TechTreeNodeData), nameof(TechTreeNodeData.GetNumRanks))]
-    internal static class Patch_GetNumRanks
-    {
-        static void Postfix(TechTreeNodeData __instance, ref int __result)
-        {
-            if (RuntimeConfig.ActiveRanks.TryGetValue(__instance.GetTechName(), out int overrideRanks))
-                __result = overrideRanks;
-        }
-    }
 
     // ── Patch: ArePrereqNodesActive ───────────────────────────────────────────
     // Original: requires all prereq techs to have state == Active (all ranks bought).
@@ -1407,9 +1407,9 @@ namespace TechRankExpanderMod
             else
                 RuntimeConfig.ActiveRanks["Favored Nation"] = 1;
             // Sustainable Farming: compound -25% fertility loss per rank.
-            // Rank 3 = -75% loss (safe). Rank 4 = 0% loss (farms never deplete — edge case).
+            // Rank 3 = -75% loss (safe). Rank 4 = 0% loss (farms never deplete).
             // Rank 5+ = negative multiplier → fertility RESTORES over time (infinite fertility, broken).
-            // Hard max = 3 to keep meaningful fertility loss and avoid rank-4 edge case.
+            // Hard max = 3: rank 4 and above are both forbidden.
             if (_rankEntries.TryGetValue("Sustainable Farming", out var sfEntry))
             {
                 int sfClamped = Mathf.Clamp(sfEntry.Value, 1, 3);
@@ -1477,15 +1477,6 @@ namespace TechRankExpanderMod
             MelonLogger.Msg("[TechRankExpander] Reset_Tech_Tree flag cleared in config.");
         }
 
-        // Called from Patch_TechTreeManager_Load after allot-all completes.
-        internal void ClearAllotFlag()
-        {
-            if (_allotEntry == null) return;
-            _allotEntry.Value = false;
-            _cat.SaveToFile();
-            MelonLogger.Msg("[TechRankExpander] Allot_All_Techs flag cleared in config.");
-        }
-
         // Removes cfg entries that exist on disk but are no longer valid (unlock-only techs
         // moved to hardcoded = 1, or techs removed in a game update). Without pruning, old
         // entries sit in the file with user-set values that look editable but are ignored.
@@ -1533,6 +1524,7 @@ namespace TechRankExpanderMod
             if (sceneName != "Map") return;
             WorkSpeedHelper.Reset();
             Patch_LivestockBuilding_Start.ClearCache();
+            Patch_WellStart.ClearCache();
             RefreshRuntimeConfig();
         }
 

@@ -1,5 +1,5 @@
 ================================================================
-  TechRankExpander  v2.2.4
+  TechRankExpander  v2.2.5
   Author : NicoriciN
   Game   : Farthest Frontier v1.1.2a (Mono / MelonLoader)
 ================================================================
@@ -131,7 +131,7 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   FILE TO UPLOAD ON NEXUSMODS
 ================================================================
-  TechRankExpander_v2.2.4.zip
+  TechRankExpander_v2.2.5.zip
 
   ZIP structure (drop-into-game-folder install):
     Mods/TechRankExpander.dll
@@ -139,6 +139,18 @@ Available on GitHub: [url=https://github.com/NicoriciN89/TechRankExpander]TechRa
 ================================================================
   NEXUSMODS CHANGELOG (paste into the "Change log" field)
 ================================================================
+v2.2.5 — Bug fixes: well bonus deduplication, dead code removal
+
+Fixed: Deep Wells water bonus could be applied more than once to the
+same well if Well.Start() was called multiple times on the same object
+(e.g. on scene reload). A per-instance HashSet now ensures the bonus
+is applied exactly once per well per map load.
+
+Removed: redundant Harmony Postfix on TechTreeNodeData.GetNumRanks()
+that was already superseded by direct field writes via NumRanksHelper.
+Also removed an unreachable ClearAllotFlag() method (Allot_All_Techs
+intentionally stays enabled until the player turns it off manually).
+
 v2.2.4 — Variolation and Pharmaceutical Study removed from cfg
 
 Variolation and Pharmaceutical Study are no longer listed in the config
@@ -252,7 +264,7 @@ v1.9.1 — Bug fixes
 ================================================================
   Category  : Gameplay
   Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
-  Version   : 2.2.4
+  Version   : 2.2.5
   Game ver. : 1.1.2a
   Requires  : MelonLoader
 ================================================================
