@@ -1,0 +1,18 @@
+# Build outputs
+bin/
+obj/
+Release/
+
+# Publish staging folder
+Publish/Mods/
+
+# Packed release
+*.zip
+
+# VS / Rider
+.vs/
+*.user
+.idea/
+
+# Game DLLs referenced by the project (not redistributed)
+# They live outside the repo in the game installation folder

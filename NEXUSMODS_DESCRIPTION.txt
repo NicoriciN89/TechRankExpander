@@ -1,0 +1,309 @@
+================================================================
+  TechRankExpander  v2.3.1
+  Author : NicoriciN
+  Game   : Farthest Frontier v1.1.2a (Mono / MelonLoader)
+================================================================
+
+NEXUSMODS PAGE TITLE
+────────────────────
+TechRankExpander — Extended Tech Ranks, KP Speed, and Safe Caps
+
+SHORT SUMMARY  (1-2 sentences shown in search results)
+──────────────────────────────────────────────────────
+Extends most technologies beyond vanilla rank limits and makes KP, carry
+capacity, work speed, livestock capacity, storage capacity, item lifetime,
+and several tech caps configurable. Includes safe limits for techs that
+would otherwise break game balance.
+
+DESCRIPTION  (paste into the NexusMods "Description" BBCode tab)
+─────────────────────────────────────────────────────────────────
+[center][size=5][b]TechRankExpander[/b][/size]
+[i]Push your tech tree further — safely and fully configurable[/i][/center]
+
+[size=4][b]What does this mod do?[/b][/size]
+
+Ever hit rank 3 on a technology and wished you could keep going? This mod lets you research most technologies up to [b]20 ranks[/b] instead of stopping at the vanilla 1–3. Everything is tunable through a simple config file — no code editing needed.
+
+On top of extended ranks, the mod adds several quality-of-life bonuses:
+[list]
+[*][b]KP speed multiplier[/b] — generate Knowledge Points faster (default: 5×)
+[*][b]Villager carry capacity[/b] — each villager hauls more per trip (default: 3×)
+[*][b]Livestock barn capacity[/b] — more animals per pen (default: 2×)
+[*][b]Work speed bonus[/b] — each rank of Production Management gives all workers a speed boost (default: +1% per rank)
+[*][b]Deep Wells water bonus[/b] — each rank adds extra well capacity (default: +50 per rank), shown in the tech tooltip
+[*][b]Storage capacity[/b] — each rank of Structural Engineering gives storehouses, granaries, root cellars, stockyards and storage depots more capacity (default: +5% per rank), shown in the tech tooltip
+[*][b]Item lifetime[/b] — each rank of Wax-Sealed Barrels makes everything that spoils last longer (default: +5% per rank, rank 20 = twice as long), shown in the tech tooltip
+[*][b]Faster planted trees[/b] — Sustainable Forestry really speeds up planted trees (the game's own formula slowed them down)
+[*][b]Faster wagons[/b] — Iron-Rimmed Wheels really speeds up transport and supply wagons (the game never applied this bonus)
+[*][b]KP hotkey[/b] — press a key (default: F8) to add Knowledge Points instantly
+[*][b]Prereqs at rank 1[/b] — dependent technologies unlock as soon as you buy the first rank of a prerequisite
+[*][b]Buildings at rank 1[/b] — tech-linked buildings become available immediately, not only after full research
+[*][b]Reset Tech Tree[/b] — set a flag in the config to refund all spent KP and reset all ranks on the next load (one-time)
+[*][b]Allot All Techs[/b] — set a flag to instantly fill every technology to its configured cap on each load (spends KP)
+[/list]
+
+[size=4][b]Safe caps — the mod won't break your game[/b][/size]
+
+Some technologies reduce crafting time, costs, or probabilities by a fixed percentage per rank. If you could research them forever, you'd end up with instant production, zero fertility loss, frozen trees, or negative gold — none of which is fun. TechRankExpander enforces safe limits automatically and refunds any excess ranks as KP on load.
+
+[b]Always locked (not in the config file):[/b]
+[list]
+[*][b]Civic Inspections[/b] — locked at 3 ranks. Each rank cuts firefighter work time by 30%. Rank 4 would make it negative — firefighters stop working entirely.
+[*][b]Sheet Composting[/b] — locked at 3 ranks. Same reason: rank 4 = negative work time, Compost Yard breaks.
+[*][b]Hygiene[/b] — locked at 4 ranks (−25% disease chance per rank). Rank 4 already eliminates disease completely. Rank 5+ has no effect.
+[*][b]Variolation[/b] — stays at the vanilla 1 rank. Rank 2 = −100% smallpox (fully gone). There is nothing left to improve.
+[*][b]Pharmaceutical Study[/b] — stays at the vanilla 1 rank. Rank 2 = 0 work time (instant craft). Further ranks would do nothing.
+[/list]
+
+[b]Configurable, but with a hard safety limit:[/b]
+[list]
+[*][b]Favored Nation[/b] — default cap 1, maximum 9. Rank 10 = 0 gold earned from the bazaar. Rank 11+ = negative sell prices. The mod clamps this to 9 no matter what you put in the config.
+[*][b]Sustainable Farming[/b] — default cap 3, maximum 3. Each rank reduces soil fertility loss. Rank 4 would eliminate all fertility loss completely, and rank 5+ would actually restore fertility forever (broken). Clamped to 3.
+[*][b]Silviculture[/b] — default cap 4, maximum 4. Each rank cuts tree growth time by 20%. Rank 5 = zero growth time. Rank 6+ = negative time: trees stay frozen at zero size and natural regrowth stops. Clamped to 4.
+[*][b]Military Logistics[/b] — default cap 9, maximum 9. Each rank reduces military upkeep costs by 10%. Rank 10 = free. Rank 11+ = negative upkeep, which gives nothing and shows a negative cost. Clamped to 9.
+[/list]
+
+[b]Configurable, safe by design:[/b]
+[list]
+[*][b]Steel Tools[/b] — default cap 9. Reduces firewood chopping time by 10% per rank. Rank 10 = instant chop.
+[*][b]Production Logistics[/b] — default cap 9. Reduces crafting time for several goods by 10% per rank. Rank 10 = instant.
+[*][b]Metallurgy[/b] — default cap 9. Reduces smelting time by 10% per rank. Rank 10 = instant.
+[*][b]Venting Chambers[/b] — default cap 6 (−15%/rank; rank 7 = instant craft)
+[*][b]Spring Pole Lathe / Stiff-Blade Saw / Stonecutting[/b] — default cap 4 (−20%/rank; rank 5 = instant)
+[*][b]Adjustable Shoe Lasts[/b] — default cap 3 (−25%/rank; rank 4 = instant craft)
+[*][b]Horse Barding[/b] — default cap 6. Each rank slows cavalry by 15%. The game silently ignores rank 7+ (it won't slow them below 0%), so going above 6 just wastes research points. The +30% health per rank has no limit and keeps stacking.
+[*][b]Masonry[/b] — default cap 15. Each rank reduces brick cost by 25% of the [i]current[/i] cost (not the original), so the reduction gets smaller each rank and stabilises at 1–2 bricks.
+[*][b]Printing Press[/b] — default cap 1 (−50%/rank; rank 2 = instant craft)
+[/list]
+
+[size=4][b]Configuration[/b][/size]
+
+After launching the game once, a config file is created at:
+[code]<game folder>\UserData\TechRankExpander.cfg[/code]
+
+Open it in any text editor. Changes take effect on the [b]next map load[/b] — no restart needed. The file is written in the game's current UI language, so descriptions appear in your language automatically.
+
+[code]
+KP_Speed_Multiplier              = 5.0    # KP generation speed (1 = vanilla)
+Carry_Capacity_Multiplier        = 3.0    # villager carry weight (1 = vanilla)
+Livestock_Capacity_Multiplier    = 2.0    # animal pen capacity (1 = vanilla)
+Work_Speed_Per_Rank              = 0.01   # +1% worker speed per Production Management rank
+Deep_Wells_Water_Volume_Per_Rank = 50     # bonus well capacity per Deep Wells rank
+Storage_Capacity_Percent_Per_Rank = 5     # storage capacity per Structural Engineering rank (0 = off)
+Item_Lifetime_Percent_Per_Rank   = 5      # item lifetime per Wax-Sealed Barrels rank (0 = off)
+Reset_Tech_Tree                  = false  # set true once to refund all ranks to KP
+Allot_All_Techs                  = false  # set true to fill all techs to cap on load
+KP_Hotkey                        = F8     # key to add KP instantly (F1–F12, Insert, etc.)
+KP_Hotkey_Amount                 = 1      # KP added per key press
+
+Ranks_Steel_Tools             = 9
+Ranks_Military_Logistics      = 9
+Ranks_Production_Logistics    = 9
+Ranks_Metallurgy              = 9
+Ranks_Masonry                 = 15
+Ranks_Horse_Armor             = 6
+Ranks_Dendrology              = 4
+# ... ~70 entries total, one per technology
+[/code]
+
+[size=4][b]Installation[/b][/size]
+[list=1]
+[*]Install [url=https://melonwiki.xyz/]MelonLoader[/url] (Mono version) into the [i]Farthest Frontier (Mono)[/i] folder.
+[*]Download [b]TechRankExpander_v2.3.1.zip[/b] from the Files tab.
+[*]Extract the ZIP into the [i]Farthest Frontier (Mono)[/i] folder. It places [b]TechRankExpander.dll[/b] into the [b]Mods[/b] subfolder automatically.
+[*]Launch the game. The config file is created on first run.
+[/list]
+
+[b]Updating from an older version:[/b] just overwrite the DLL. Your config is preserved. Any ranks above the new safe caps are refunded as KP automatically. Old or renamed config keys are cleaned up automatically.
+
+[size=4][b]Requirements[/b][/size]
+[list]
+[*]Farthest Frontier v1.1.2a
+[*][url=https://melonwiki.xyz/]MelonLoader[/url] v0.6.1 or newer — [b]Mono[/b] build (not Il2Cpp)
+[/list]
+
+[size=4][b]Compatibility[/b][/size]
+[list]
+[*]Works on existing saves — safe to add or remove mid-playthrough.
+[*]All excess ranks are automatically refunded as KP when you load a save.
+[*]Compatible with most other mods, as long as they don't patch the same tech-tree methods.
+[*][b]Tended Wilds[/b] by SageDragoon sets Woodlore to 2 ranks, so Ranks_Woodlore has no effect while both mods are installed.
+[/list]
+
+[size=4][b]Source code[/b][/size]
+Fully open source: [url=https://github.com/NicoriciN89/TechRankExpander]github.com/NicoriciN89/TechRankExpander[/url]
+
+================================================================
+  FILE TO UPLOAD ON NEXUSMODS
+================================================================
+  TechRankExpander_v2.3.1.zip
+
+  ZIP structure (drop-into-game-folder install):
+    Mods/TechRankExpander.dll
+
+================================================================
+  NEXUSMODS CHANGELOG (paste into the "Change log" field)
+================================================================
+v2.3.1 — Iron-Rimmed Wheels fix
+
+Fixed: Iron-Rimmed Wheels never sped up wagons, not even at the vanilla rank 1. The game
+stored the bonus under the wagon prefab but looked it up on the spawned wagon, so it was
+never found. The bonus now applies the next time a wagon starts a trip.
+
+v2.3.0 — Tree growth fixes, storage capacity and item lifetime bonuses
+
+Fixed: at Silviculture rank 6+ the tree growth time went negative. New trees stayed at
+zero size with no wood, and natural regrowth eventually stopped. Silviculture is now hard
+capped at rank 4 (20% of the base growth time); extra ranks are refunded as KP. Frozen
+trees in existing saves restart when the save loads.
+
+Fixed: a tech clamped to its cap on load could still be bought past that cap.
+
+Changed: Military Logistics is now hard capped at rank 9. Rank 11+ made upkeep negative,
+which gave no benefit and showed a negative cost in the UI. Extra ranks are refunded as KP.
+
+Fixed: Sustainable Forestry made foresters' trees grow slower with every rank. Now it
+speeds them up: rank 20 = 20% of the base time.
+
+Added: Structural Engineering gives +5% capacity per rank on storehouses, granaries, root
+cellars, stockyards and storage depots. Wax-Sealed Barrels gives +5% item lifetime per
+rank (rank 20 = items last twice as long). Both are configurable, 0 = off.
+
+v2.2.6 — Military Logistics cap corrected to 20
+
+Diagnostic log showed Military Logistics uses GE_ExpenseTypeAmountModify
+(reduces military upkeep cost) — not GE_ManufacturingWorkModify. There
+is no work-time risk, so the cap 9 restriction was wrong. Raised to 20.
+
+Steel Tools confirmed to affect Firewood only (ManufactureFirewood +
+ManufactureFirewood 2). Cap 9 is correct and unchanged.
+
+v2.2.5 — Bug fixes: well bonus deduplication, dead code removal
+
+Fixed: Deep Wells water bonus could be applied more than once to the
+same well if Well.Start() was called multiple times on the same object
+(e.g. on scene reload). A per-instance HashSet now ensures the bonus
+is applied exactly once per well per map load.
+
+Removed: redundant Harmony Postfix on TechTreeNodeData.GetNumRanks()
+that was already superseded by direct field writes via NumRanksHelper.
+Also removed an unreachable ClearAllotFlag() method (Allot_All_Techs
+intentionally stays enabled until the player turns it off manually).
+
+v2.2.4 — Variolation and Pharmaceutical Study removed from cfg
+
+Variolation and Pharmaceutical Study are no longer listed in the config
+file and their vanilla rank caps are left untouched.
+
+Variolation: each rank reduces smallpox chance by 50%. Rank 2 already
+eliminates smallpox entirely (−100%) — no further effect is possible
+beyond rank 1. Offering ranks 2–20 in the config was misleading.
+
+Pharmaceutical Study: each rank reduces medicine work time by 50% and
+increases shelf life by 100%. Rank 2 = instant craft (0 work time) —
+raising it further has no additional effect. Cap kept at vanilla.
+
+Existing cfg files are cleaned up automatically on first load — the
+Ranks_Variolation and Ranks_Pharmaceutical_Study keys are removed.
+
+Marksman Training investigated: uses GE_BuildingAttackSpeedModify (tag-
+based system), not a shared ranged-weapon ScriptableObject. The attack
+speed bonus applying to bandit lookout towers is vanilla game behaviour,
+not a mod side-effect. Cap remains 20.
+
+v2.2.3 — Advanced Metal-Casting restored
+
+Advanced Metal-Casting was incorrectly classified as unlock-only in
+v2.2.1 and removed from the rank list. It actually uses
+GE_HeavyToolBonusModify (+tool and heavy tool health per rank) which is
+a repeatable per-rank bonus. Restored with cap 20.
+
+v2.2.2 — Forging fix + Horse Barding safe cap
+
+Forging ("Unlock Foundry") is now treated as an unlock-only technology
+and removed from the rank expansion list. It previously appeared as
+0/20 in the tech tree despite having no repeatable per-rank bonus.
+Old Ranks_Forging entries in existing cfg files are removed automatically
+on first load.
+
+Horse Barding cap lowered from 20 to 6. Each rank applies −15% cavalry
+speed via GE_MountedSoldierModify. The game internally clamps the total
+movement penalty to <100%, so ranks 7–20 were silently ignored and wasted
+research points. Cap 6 = −90% speed (near-stationary cavalry, maximum
+meaningful effect). The +30% health per rank has no upper limit and
+continues to apply at any cap setting.
+
+v2.2.1 — Fix unlock-only tech cap bypass via cfg
+
+Unlock-only technologies (those that only unlock a building, resource,
+or unit at rank 1 with no repeatable bonus) are now hardcoded to cap=1
+regardless of the UserData/TechRankExpander.cfg file contents.
+
+Previously, if the cfg file was written by an earlier mod version with
+cap=20 for these techs (Animal Husbandry, Cavalry, Forestry, etc.), the
+old values persisted and allowed researching beyond rank 1 — which had
+no gameplay effect but looked wrong in the UI (e.g. "0/20" instead of
+"0/1"). These techs no longer appear in the cfg file at all; their cap
+is always exactly 1.
+
+Full list of affected techs: Animal Husbandry, Commerce Negotiations,
+Coal-Fired Stoves, Intensive Animal Farming, Siege Warfare, Conscription,
+Convenience Tax, Prohibition, Brigandine Armor, Economic Power, Beacon of
+Culture, Gates of Valor, Guilds, Pharmacy, Citadels, Canning, Caseiculture,
+Trade Center, Bookbinding, Hospitalization, School of Thought, Cavalry,
+Reinforced Plating, Tools of War, Grain Crops, Arrow Loops, Market Forces,
+Nursing, Stone Battlements, Forestry, Battlement Fortifications,
+Wonders of the Frontier.
+
+v2.0.0 — Full update for Farthest Frontier v1.9.4
+
+Breaking change: the game's ActivateTechOrRank method gained a new
+knowledgePointCost parameter in v1.9.4. The previous mod version would crash
+on load due to the Harmony patch signature mismatch. Fixed.
+
+Added 40+ new technologies introduced in v1.9.4 to the rank-expansion system:
+Rodent-Proofing, Animal Husbandry, Commerce Negotiations, Coal-Fired Stoves,
+Intensive Animal Farming, Siege Warfare, Conscription, Convenience Tax,
+Prohibition, Brigandine Armor, Economic Power, Beacon of Culture, Gates of
+Valor, Guilds, Pharmacy, Citadels, Canning, Blast Furnace, Quarry, Woodworking,
+Caseiculture, Brewing, Barrel-Making, Trade Center, Bookbinding, Hospitalization,
+School of Thought, Cavalry, Reinforced Plating, Tools of War, Glass Blowing,
+Grain Crops, Arrow Loops, Arms Production, Smithing, Forging, Market Forces,
+Paper Press, Nursing, Stone Battlements, Mining, Forestry, Battlement
+Fortifications, Wonders of the Frontier.
+
+Work-time techs (Blast Furnace, Quarry, Woodworking, Brewing, Barrel-Making,
+Bookbinding, Glass Blowing, Arms Production, Smithing, Forging, Paper Press,
+Mining) default to conservative caps (4 or 9) to preserve nonzero work time.
+All others default to 20. Adjust in UserData/TechRankExpander.cfg.
+
+v1.9.2 — Bug fixes & protection mechanism
+
+Fixed wrong caps (found by decompiling Assembly-CSharp.dll):
+• Masonry cap raised 5 → 15: reduction is COMPOUND (−25% of current bricks per
+  rank, not original). Previous cap was based on incorrect linear assumption.
+• Stonecutting cap lowered 5 → 4: rank 5 = instant mining (0 work units). Cap
+  at 4 keeps at least 20% work time.
+• Sustainable Farming default raised 3 → 4, hard runtime clamp at max 4.
+  Rank 4 = 0% fertility loss (safe). Rank 5+ = farms restore fertility (broken).
+• All work-time comments corrected: game clamps to 0 (instant), not negative.
+
+Protection mechanism added:
+• Runtime guard on HappinessManager.GetWorkRateMultiplier(Villager) ensures
+  occupation work rates never go negative (workers can never freeze due to
+  misconfigured tech bonuses).
+• Runtime clamp for Sustainable Farming with a logged warning.
+
+v1.9.1 — Bug fixes
+• Livestock barn capacity no longer compounds on repeated map reloads.
+• KP refund/cost counters now reset at load start, not just load end.
+
+================================================================
+  NEXUSMODS PAGE SETTINGS
+================================================================
+  Category  : Gameplay
+  Tags      : Tech Tree, Progression, Balance, Configurable, Quality of Life
+  Version   : 2.3.1
+  Game ver. : 1.1.2a
+  Requires  : MelonLoader
+================================================================
